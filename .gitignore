@@ -1,0 +1,35 @@
+# Dependências
+node_modules/
+
+# Build
+dist/
+dist-ssr/
+
+# Variáveis de ambiente (NUNCA commitar a chave)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Logs de sessões (contêm dados financeiros falados — nunca commitar)
+logs/
+
+# Editor / SO
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Excel temporário
+~$*.xlsx
+
+# Artefatos de teste de navegador
+.playwright-mcp/
+*.png
+
+# TS build info
+*.tsbuildinfo
