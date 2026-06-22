@@ -67,7 +67,8 @@ systemctl reload caddy
 echo ""
 echo "Sucesso! Acesse: https://canva.mvpsardenberg.cloud"
 '@
-$SCRIPT_CONTENT | Out-File -FilePath "$env:TEMP\deploy-canva.sh" -Encoding UTF8
+# Grava LF + sem BOM: Out-File -Encoding UTF8 (PS 5.1) põe BOM e CRLF, e o bash da VPS quebra.
+[System.IO.File]::WriteAllText("$env:TEMP\deploy-canva.sh", ($SCRIPT_CONTENT -replace "`r`n", "`n"), (New-Object System.Text.UTF8Encoding $false))
 Write-Host "OK - Script pronto" -ForegroundColor Green
 Write-Host ""
 
