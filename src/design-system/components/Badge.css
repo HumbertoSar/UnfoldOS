@@ -1,0 +1,77 @@
+.uf-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--uf-space-2xs);
+  padding: 3px var(--uf-space-xs);
+  border-radius: var(--uf-radius-full);
+  font-size: var(--uf-text-caption);
+  font-weight: var(--uf-weight-medium);
+  line-height: 1.4;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.uf-badge__icon {
+  display: inline-flex;
+  margin-left: -1px;
+}
+.uf-badge__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--uf-radius-full);
+  background: currentColor;
+  opacity: 0.85;
+}
+
+/* Tons — fundo macio + tinta legível */
+.uf-badge--neutral {
+  background: var(--uf-color-neutral-soft);
+  color: var(--uf-color-neutral-ink);
+}
+.uf-badge--primary {
+  background: var(--uf-color-primary-soft);
+  color: var(--uf-color-primary);
+}
+.uf-badge--positive {
+  background: var(--uf-color-positive-soft);
+  color: var(--uf-color-positive-ink);
+}
+.uf-badge--attention {
+  background: var(--uf-color-attention-soft);
+  color: var(--uf-color-attention-ink);
+}
+.uf-badge--forming {
+  background: var(--uf-color-forming-soft);
+  color: var(--uf-color-forming-ink);
+}
+
+/* Soft — sem fundo, só ponto + texto */
+.uf-badge--soft {
+  background: transparent;
+  border-color: transparent;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* ConfidenceDots */
+.uf-confidence-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--uf-space-xs);
+}
+.uf-confidence-dots__label {
+  font-size: var(--uf-text-caption);
+  color: var(--uf-color-ink-tertiary);
+}
+.uf-confidence-dots__track {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.uf-confidence-dots__dot {
+  border-radius: var(--uf-radius-full);
+  background: var(--uf-color-border-strong);
+  transition: background-color var(--uf-duration-base) var(--uf-ease-standard);
+}
+.uf-confidence-dots__dot.is-on {
+  background: var(--uf-color-positive);
+}

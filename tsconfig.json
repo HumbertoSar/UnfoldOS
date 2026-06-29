@@ -19,7 +19,12 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
 
-    "types": ["vitest/globals", "node"]
+    "types": ["vitest/globals", "node"],
+
+    "baseUrl": ".",
+    "paths": {
+      "@ds/*": ["./src/design-system/*"]
+    }
   },
   "include": ["src", "server"]
 }

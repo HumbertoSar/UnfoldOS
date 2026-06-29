@@ -1,0 +1,35 @@
+.uf-waveform {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+.uf-waveform__bar {
+  width: 3px;
+  border-radius: var(--uf-radius-full);
+  background: currentColor;
+  transform-origin: center;
+  opacity: 0.9;
+}
+
+.uf-waveform.is-active .uf-waveform__bar {
+  animation: uf-wave 1100ms var(--uf-ease-standard) infinite;
+}
+
+@keyframes uf-wave {
+  0%,
+  100% {
+    transform: scaleY(0.32);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .uf-waveform.is-active .uf-waveform__bar {
+    animation: none;
+    transform: scaleY(0.7);
+  }
+}

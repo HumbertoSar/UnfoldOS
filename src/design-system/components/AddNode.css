@@ -1,0 +1,30 @@
+.uf-addnode {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--uf-space-xs);
+}
+.uf-addnode__btn {
+  display: grid;
+  place-items: center;
+  border-radius: var(--uf-radius-full);
+  color: var(--uf-color-ink-tertiary);
+  background: transparent;
+  border: 1.5px dashed var(--uf-color-border-strong);
+  transition: color var(--uf-duration-fast) var(--uf-ease-standard),
+    border-color var(--uf-duration-fast) var(--uf-ease-standard),
+    background-color var(--uf-duration-fast) var(--uf-ease-standard),
+    transform var(--uf-duration-fast) var(--uf-ease-standard);
+}
+.uf-addnode__btn:hover {
+  color: var(--uf-color-primary);
+  border-color: var(--uf-color-primary);
+  background: var(--uf-color-primary-soft);
+  transform: scale(1.03);
+}
+.uf-addnode__btn:active {
+  transform: scale(0.98);
+}
+.uf-addnode__label {
+  color: var(--uf-color-ink-tertiary);
+}

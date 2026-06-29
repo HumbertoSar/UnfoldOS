@@ -1,0 +1,87 @@
+.uf-mic {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  border-radius: var(--uf-radius-full);
+  isolation: isolate;
+}
+.uf-mic--md {
+  width: 64px;
+  height: 64px;
+}
+.uf-mic--lg {
+  width: 96px;
+  height: 96px;
+}
+
+.uf-mic__core {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--uf-radius-full);
+  color: var(--uf-color-on-primary);
+  background: radial-gradient(
+      120% 120% at 30% 20%,
+      var(--uf-indigo-400) 0%,
+      var(--uf-indigo-500) 38%,
+      var(--uf-azul-profundo) 100%
+    );
+  box-shadow: var(--uf-elevation-3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  transition: transform var(--uf-duration-base) var(--uf-ease-spring),
+    box-shadow var(--uf-duration-base) var(--uf-ease-standard);
+}
+
+.uf-mic:hover .uf-mic__core {
+  transform: scale(1.04);
+}
+.uf-mic:active .uf-mic__core {
+  transform: scale(0.97);
+}
+.uf-mic:focus-visible {
+  outline: none;
+}
+.uf-mic:focus-visible .uf-mic__core {
+  box-shadow: var(--uf-focus-ring), var(--uf-elevation-3);
+}
+
+/* Anéis de respiro — só quando ouvindo */
+.uf-mic__ring {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: var(--uf-radius-full);
+  background: var(--uf-color-primary);
+  opacity: 0;
+  pointer-events: none;
+}
+.uf-mic.is-listening .uf-mic__ring {
+  animation: uf-mic-pulse 2200ms var(--uf-ease-standard) infinite;
+}
+.uf-mic.is-listening .uf-mic__ring--2 {
+  animation-delay: 1100ms;
+}
+
+@keyframes uf-mic-pulse {
+  0% {
+    opacity: 0.28;
+    transform: scale(1);
+  }
+  70% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .uf-mic.is-listening .uf-mic__ring {
+    animation: none;
+  }
+}

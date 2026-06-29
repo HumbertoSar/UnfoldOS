@@ -1,0 +1,259 @@
+/* =============================================================================
+   Unfold OS — Design Tokens (source of truth, runtime)
+   -----------------------------------------------------------------------------
+   A conversa vira clareza. Os tokens abaixo traduzem o pôster "Canvas Vivo"
+   para uma linguagem de produto: calma, humana e construída por proximidade.
+
+   Camadas:
+     1. Primitivos  — a paleta crua + escalas derivadas (não usar direto na UI)
+     2. Semânticos  — o vocabulário da interface (use SEMPRE estes nos componentes)
+     3. Componente  — ajustes finos por componente (herdam dos semânticos)
+   ============================================================================= */
+
+:root {
+  /* ---------------------------------------------------------------------------
+     1. PRIMITIVOS — Paleta base (Canvas Vivo)
+     --------------------------------------------------------------------------- */
+  --uf-azul-profundo: #0e142b; /* Deep   — fundo de confiança, texto principal   */
+  --uf-indigo: #24385a;        /* Índigo — primário, ações, foco                 */
+  --uf-grafite: #485563;       /* Graphite — texto secundário, traços neutros    */
+  --uf-pedra: #e7eaee;         /* Stone  — bordas, divisores                      */
+  --uf-areia: #f3f6f8;         /* Sand   — a canvas, o espaço mental              */
+  --uf-salvia: #3fa688;        /* Sage   — diagnóstico saudável, progresso        */
+  --uf-ambar: #d4af37;         /* Amber  — acento sutil, atenção sem alarme       */
+
+  /* Neutros — frios e calmos, ancorados em Areia / Pedra / Grafite / Profundo */
+  --uf-neutral-0: #ffffff;
+  --uf-neutral-50: #f8fafb;
+  --uf-neutral-100: #f3f6f8; /* = Areia  */
+  --uf-neutral-150: #eceff3;
+  --uf-neutral-200: #e7eaee; /* = Pedra  */
+  --uf-neutral-300: #d5dae1;
+  --uf-neutral-400: #aeb6c1;
+  --uf-neutral-500: #8a94a3;
+  --uf-neutral-600: #677085;
+  --uf-neutral-700: #485563; /* = Grafite */
+  --uf-neutral-800: #2c3848;
+  --uf-neutral-900: #1a2233;
+  --uf-neutral-950: #0e142b; /* = Profundo */
+
+  /* Índigo — primário */
+  --uf-indigo-50: #eef1f7;
+  --uf-indigo-100: #d8dfec;
+  --uf-indigo-200: #b3c0da;
+  --uf-indigo-300: #8093bc;
+  --uf-indigo-400: #51689b;
+  --uf-indigo-500: #24385a; /* base */
+  --uf-indigo-600: #1e2f4c;
+  --uf-indigo-700: #18263d;
+  --uf-indigo-800: #121c2e;
+  --uf-indigo-900: #0e142b;
+
+  /* Sálvia — diagnóstico / progresso saudável */
+  --uf-sage-50: #ecf6f2;
+  --uf-sage-100: #d2ebe2;
+  --uf-sage-200: #a6d7c6;
+  --uf-sage-300: #79c3a9;
+  --uf-sage-400: #56b295;
+  --uf-sage-500: #3fa688; /* base */
+  --uf-sage-600: #348b72;
+  --uf-sage-700: #2a6f5b;
+  --uf-sage-800: #205445;
+  --uf-sage-900: #163a30;
+
+  /* Âmbar — acento / atenção suave */
+  --uf-amber-50: #faf4e2;
+  --uf-amber-100: #f3e6be;
+  --uf-amber-200: #e8d08a;
+  --uf-amber-300: #ddbc5c;
+  --uf-amber-400: #d4af37; /* base */
+  --uf-amber-500: #be9a2c;
+  --uf-amber-600: #9c7e24;
+  --uf-amber-700: #7a631c;
+  --uf-amber-800: #574716;
+  --uf-amber-900: #3a2f0f;
+
+  /* ---------------------------------------------------------------------------
+     2. SEMÂNTICOS — o vocabulário da interface
+     --------------------------------------------------------------------------- */
+
+  /* Superfícies & fundos */
+  --uf-color-canvas: var(--uf-areia);            /* o espaço mental infinito      */
+  --uf-color-canvas-grid: #e4e9ef;               /* pontos/linhas do grid da canvas */
+  --uf-color-bg: var(--uf-neutral-50);
+  --uf-color-surface: var(--uf-neutral-0);       /* o card                         */
+  --uf-color-surface-sunken: var(--uf-neutral-100);
+  --uf-color-surface-muted: var(--uf-neutral-150);
+  --uf-color-surface-inverse: var(--uf-azul-profundo);
+
+  /* Tinta (texto) */
+  --uf-color-ink: var(--uf-azul-profundo);       /* texto principal                */
+  --uf-color-ink-secondary: var(--uf-grafite);   /* texto de apoio                 */
+  --uf-color-ink-tertiary: var(--uf-neutral-600);/* legendas, metadados (AA ~4.9:1)*/
+  --uf-color-ink-disabled: var(--uf-neutral-400);
+  --uf-color-ink-on-dark: var(--uf-areia);       /* texto sobre superfície escura  */
+  --uf-color-ink-on-accent: var(--uf-azul-profundo);
+
+  /* Bordas & divisores */
+  --uf-color-border: var(--uf-pedra);
+  --uf-color-border-strong: var(--uf-neutral-300);
+  --uf-color-border-muted: var(--uf-neutral-150);
+  --uf-color-divider: var(--uf-neutral-150);
+
+  /* Primário (ações, foco, microfone) */
+  --uf-color-primary: var(--uf-indigo-500);
+  --uf-color-primary-hover: var(--uf-indigo-600);
+  --uf-color-primary-active: var(--uf-indigo-700);
+  --uf-color-primary-strong: var(--uf-azul-profundo);
+  --uf-color-primary-soft: var(--uf-indigo-50);
+  --uf-color-on-primary: var(--uf-areia);
+  --uf-color-focus-ring: rgba(36, 56, 90, 0.35);
+
+  /* Acento (âmbar) — usado com parcimônia */
+  --uf-color-accent: var(--uf-amber-400);
+  --uf-color-accent-soft: var(--uf-amber-50);
+  --uf-color-accent-ink: var(--uf-amber-700);
+
+  /* Estados de diagnóstico — comunicam por tom, nunca por alarme */
+  --uf-color-positive: var(--uf-sage-500);
+  --uf-color-positive-soft: var(--uf-sage-50);
+  --uf-color-positive-ink: var(--uf-sage-700);
+
+  --uf-color-attention: var(--uf-amber-400);
+  --uf-color-attention-soft: var(--uf-amber-50);
+  --uf-color-attention-ink: var(--uf-amber-700);
+
+  --uf-color-neutral: var(--uf-neutral-400);
+  --uf-color-neutral-soft: var(--uf-neutral-100);
+  --uf-color-neutral-ink: var(--uf-neutral-600);
+
+  /* Diagnóstico "em formação" — incompletude visível, sem pressa */
+  --uf-color-forming: var(--uf-indigo-300);
+  --uf-color-forming-soft: var(--uf-indigo-50);
+  --uf-color-forming-ink: var(--uf-indigo-500);
+
+  /* ---------------------------------------------------------------------------
+     Tipografia
+     --------------------------------------------------------------------------- */
+  --uf-font-sans: "Inter", "Inter var", system-ui, -apple-system,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --uf-font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --uf-weight-regular: 400;
+  --uf-weight-medium: 500;
+  --uf-weight-semibold: 600;
+
+  /* Escala (px → rem em base 16) — espelha o pôster: 40 / 28 / 20 / 16 / 12 */
+  --uf-text-display: 3.5rem;  /* 56 — herói "Unfold"                */
+  --uf-text-title-1: 2.5rem;  /* 40 — Título 1 / Semibold           */
+  --uf-text-title-2: 1.75rem; /* 28 — Título 2 / Semibold           */
+  --uf-text-title-3: 1.25rem; /* 20 — Título 3 / Semibold           */
+  --uf-text-body-lg: 1.125rem;/* 18 — corpo destacado               */
+  --uf-text-body: 1rem;       /* 16 — Texto / Regular               */
+  --uf-text-label: 0.875rem;  /* 14 — rótulos, botões               */
+  --uf-text-caption: 0.75rem; /* 12 — Legenda / Regular             */
+  --uf-text-overline: 0.6875rem; /* 11 — seções (CAIXA ALTA)        */
+
+  --uf-leading-tight: 1.08;
+  --uf-leading-snug: 1.25;
+  --uf-leading-normal: 1.5;
+  --uf-leading-relaxed: 1.62;
+
+  --uf-tracking-tight: -0.02em;
+  --uf-tracking-snug: -0.01em;
+  --uf-tracking-normal: 0;
+  --uf-tracking-wide: 0.04em;
+  --uf-tracking-overline: 0.14em;
+
+  /* ---------------------------------------------------------------------------
+     Espaçamento — base 4px, ritmo generoso (respiro é parte do método)
+     --------------------------------------------------------------------------- */
+  --uf-space-0: 0;
+  --uf-space-3xs: 0.125rem; /* 2  */
+  --uf-space-2xs: 0.25rem;  /* 4  */
+  --uf-space-xs: 0.5rem;    /* 8  */
+  --uf-space-sm: 0.75rem;   /* 12 */
+  --uf-space-md: 1rem;      /* 16 */
+  --uf-space-lg: 1.25rem;   /* 20 */
+  --uf-space-xl: 1.5rem;    /* 24 */
+  --uf-space-2xl: 2rem;     /* 32 */
+  --uf-space-3xl: 2.5rem;   /* 40 */
+  --uf-space-4xl: 3rem;     /* 48 */
+  --uf-space-5xl: 4rem;     /* 64 */
+  --uf-space-6xl: 5rem;     /* 80 */
+  --uf-space-7xl: 6rem;     /* 96 */
+
+  /* ---------------------------------------------------------------------------
+     Raios — cantos suaves, formas amigáveis
+     --------------------------------------------------------------------------- */
+  --uf-radius-xs: 6px;
+  --uf-radius-sm: 8px;
+  --uf-radius-md: 12px;
+  --uf-radius-lg: 16px;
+  --uf-radius-xl: 20px;
+  --uf-radius-2xl: 28px;
+  --uf-radius-full: 999px;
+
+  /* ---------------------------------------------------------------------------
+     Elevação — sombras macias de tinta profunda, nunca cinza puro
+     --------------------------------------------------------------------------- */
+  --uf-elevation-0: none;
+  --uf-elevation-1: 0 1px 2px rgba(14, 20, 43, 0.04),
+    0 1px 3px rgba(14, 20, 43, 0.06);
+  --uf-elevation-2: 0 2px 6px rgba(14, 20, 43, 0.05),
+    0 6px 16px rgba(14, 20, 43, 0.06);
+  --uf-elevation-3: 0 2px 6px rgba(14, 20, 43, 0.04),
+    0 12px 28px rgba(14, 20, 43, 0.1);
+  --uf-elevation-4: 0 24px 56px rgba(14, 20, 43, 0.16);
+  /* Card "levantado" sobre a canvas ao arrastar */
+  --uf-elevation-lift: 0 18px 40px rgba(14, 20, 43, 0.18);
+  --uf-focus-ring: 0 0 0 3px var(--uf-color-focus-ring);
+
+  /* ---------------------------------------------------------------------------
+     Movimento — o "unfold" é a assinatura: entra desdobrando, nunca surge pronto
+     --------------------------------------------------------------------------- */
+  --uf-duration-instant: 80ms;
+  --uf-duration-fast: 140ms;
+  --uf-duration-base: 220ms;
+  --uf-duration-slow: 320ms;
+  --uf-duration-unfold: 520ms; /* a abertura de um card */
+  --uf-duration-settle: 720ms; /* o reposicionamento por afinidade */
+
+  --uf-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --uf-ease-entrance: cubic-bezier(0.16, 1, 0.3, 1); /* desacelera com calma */
+  --uf-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --uf-ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1); /* leve respiro ao abrir */
+
+  /* ---------------------------------------------------------------------------
+     Camadas (z-index)
+     --------------------------------------------------------------------------- */
+  --uf-z-canvas: 0;
+  --uf-z-cluster: 5;
+  --uf-z-card: 10;
+  --uf-z-card-active: 20;
+  --uf-z-minimap: 80;
+  --uf-z-controls: 100;
+  --uf-z-overlay: 1000;
+  --uf-z-popover: 1100;
+  --uf-z-toast: 1200;
+
+  /* ---------------------------------------------------------------------------
+     Layout
+     --------------------------------------------------------------------------- */
+  --uf-card-width: 280px;
+  --uf-card-width-wide: 360px;
+  --uf-container-max: 1440px;
+  --uf-canvas-grid-size: 28px;
+}
+
+/* Respeita quem pede menos movimento — o silêncio também é parte da experiência */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --uf-duration-instant: 0ms;
+    --uf-duration-fast: 0ms;
+    --uf-duration-base: 0ms;
+    --uf-duration-slow: 0ms;
+    --uf-duration-unfold: 0ms;
+    --uf-duration-settle: 0ms;
+  }
+}

@@ -1,0 +1,5 @@
+/* Inter — auto-hospedado via @fontsource (sem dependência de rede em runtime).
+   Pesos do design system: 400 (Regular), 500 (Medium), 600 (Semibold). */
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";

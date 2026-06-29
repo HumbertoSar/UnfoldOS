@@ -1,0 +1,66 @@
+.uf-score {
+  display: grid;
+  grid-template-columns: 1fr 2fr auto;
+  align-items: center;
+  gap: var(--uf-space-md);
+
+  /* tom resolvido → cor do preenchimento/marcador */
+  --uf-score-color: var(--uf-color-positive);
+}
+.uf-score--positive {
+  --uf-score-color: var(--uf-color-positive);
+}
+.uf-score--attention {
+  --uf-score-color: var(--uf-color-attention);
+}
+.uf-score--forming {
+  --uf-score-color: var(--uf-color-forming);
+}
+.uf-score--neutral {
+  --uf-score-color: var(--uf-color-primary);
+}
+
+.uf-score__label {
+  font-size: var(--uf-text-label);
+  color: var(--uf-color-ink-secondary);
+}
+
+.uf-score__track {
+  position: relative;
+  height: 6px;
+  border-radius: var(--uf-radius-full);
+  background: var(--uf-color-surface-muted);
+}
+.uf-score__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  height: 100%;
+  border-radius: var(--uf-radius-full);
+  background: var(--uf-score-color);
+  transition: width var(--uf-duration-settle) var(--uf-ease-entrance);
+}
+.uf-score__thumb {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: var(--uf-radius-full);
+  background: var(--uf-color-surface);
+  border: 2.5px solid var(--uf-score-color);
+  transform: translate(-50%, -50%);
+  box-shadow: var(--uf-elevation-1);
+  transition: left var(--uf-duration-settle) var(--uf-ease-entrance);
+}
+
+.uf-score__value {
+  font-size: var(--uf-text-label);
+  font-weight: var(--uf-weight-semibold);
+  color: var(--uf-color-ink);
+  font-variant-numeric: tabular-nums;
+  min-width: 3.2em;
+  text-align: right;
+}
+.uf-score__max {
+  color: var(--uf-color-ink-tertiary);
+  font-weight: var(--uf-weight-regular);
+}

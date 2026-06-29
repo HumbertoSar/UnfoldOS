@@ -1,0 +1,103 @@
+.uf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--uf-space-xs);
+  font-family: var(--uf-font-sans);
+  font-weight: var(--uf-weight-medium);
+  line-height: 1;
+  white-space: nowrap;
+  border-radius: var(--uf-radius-full);
+  border: 1px solid transparent;
+  transition: background-color var(--uf-duration-fast) var(--uf-ease-standard),
+    color var(--uf-duration-fast) var(--uf-ease-standard),
+    border-color var(--uf-duration-fast) var(--uf-ease-standard),
+    box-shadow var(--uf-duration-fast) var(--uf-ease-standard),
+    transform var(--uf-duration-fast) var(--uf-ease-standard);
+}
+.uf-btn:active {
+  transform: translateY(0.5px) scale(0.99);
+}
+.uf-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Tamanhos */
+.uf-btn--sm {
+  height: 32px;
+  padding: 0 var(--uf-space-sm);
+  font-size: var(--uf-text-label);
+}
+.uf-btn--md {
+  height: 40px;
+  padding: 0 var(--uf-space-lg);
+  font-size: var(--uf-text-label);
+}
+.uf-btn--lg {
+  height: 52px;
+  padding: 0 var(--uf-space-xl);
+  font-size: var(--uf-text-body);
+}
+.uf-btn--block {
+  width: 100%;
+}
+.uf-btn--icon {
+  padding: 0;
+  aspect-ratio: 1;
+}
+.uf-btn--icon.uf-btn--sm {
+  width: 32px;
+}
+.uf-btn--icon.uf-btn--md {
+  width: 40px;
+}
+.uf-btn--icon.uf-btn--lg {
+  width: 52px;
+}
+
+.uf-btn__icon {
+  display: inline-flex;
+}
+
+/* Primário */
+.uf-btn--primary {
+  background: var(--uf-color-primary);
+  color: var(--uf-color-on-primary);
+}
+.uf-btn--primary:hover {
+  background: var(--uf-color-primary-hover);
+}
+.uf-btn--primary:active {
+  background: var(--uf-color-primary-active);
+}
+
+/* Secundário (contorno) */
+.uf-btn--secondary {
+  background: var(--uf-color-surface);
+  color: var(--uf-color-primary);
+  border-color: var(--uf-color-border-strong);
+}
+.uf-btn--secondary:hover {
+  background: var(--uf-color-primary-soft);
+  border-color: var(--uf-color-primary);
+}
+
+/* Fantasma (texto + ícone, sem fundo) */
+.uf-btn--ghost {
+  background: transparent;
+  color: var(--uf-color-primary);
+}
+.uf-btn--ghost:hover {
+  background: var(--uf-color-primary-soft);
+}
+
+/* Sutil (neutro, baixa ênfase) */
+.uf-btn--subtle {
+  background: var(--uf-color-surface-sunken);
+  color: var(--uf-color-ink-secondary);
+}
+.uf-btn--subtle:hover {
+  background: var(--uf-color-surface-muted);
+  color: var(--uf-color-ink);
+}

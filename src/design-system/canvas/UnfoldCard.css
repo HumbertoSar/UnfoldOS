@@ -1,0 +1,45 @@
+.uf-unfold {
+  position: absolute;
+  transform-origin: center top;
+  animation: uf-unfold-in var(--uf-duration-unfold) var(--uf-ease-spring) both;
+}
+
+.uf-unfold.is-draggable {
+  cursor: grab;
+}
+.uf-unfold.is-dragging {
+  cursor: grabbing;
+}
+
+/* Enquanto arrasta, o card "levanta" da canvas */
+.uf-unfold.is-dragging > * {
+  box-shadow: var(--uf-elevation-lift) !important;
+}
+
+@keyframes uf-unfold-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.94);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .uf-unfold {
+    animation: uf-unfold-fade var(--uf-duration-base) var(--uf-ease-standard) both;
+  }
+  @keyframes uf-unfold-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}

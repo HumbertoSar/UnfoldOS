@@ -1,0 +1,19 @@
+.uf-minimap {
+  background: var(--uf-color-surface);
+  border: 1px solid var(--uf-color-border);
+  border-radius: var(--uf-radius-md);
+  box-shadow: var(--uf-elevation-2);
+  padding: var(--uf-space-xs);
+  overflow: hidden;
+}
+.uf-minimap svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.uf-minimap__viewport {
+  fill: rgba(36, 56, 90, 0.06);
+  stroke: var(--uf-color-primary);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}

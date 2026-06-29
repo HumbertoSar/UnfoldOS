@@ -1,0 +1,42 @@
+.uf-canvas {
+  position: relative;
+  overflow: hidden;
+  background: var(--uf-color-canvas);
+  border-radius: var(--uf-radius-xl);
+  border: 1px solid var(--uf-color-border);
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+}
+.uf-canvas.is-panning {
+  cursor: grabbing;
+}
+
+.uf-canvas__grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(
+    circle,
+    var(--uf-color-canvas-grid) 1.4px,
+    transparent 1.4px
+  );
+  pointer-events: none;
+}
+
+.uf-canvas__content {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 0;
+  /* a transição só no settle programático; durante o drag o React atualiza direto */
+  will-change: transform;
+}
+
+.uf-canvas__overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--uf-z-controls);
+}
+.uf-canvas__overlay > * {
+  pointer-events: auto;
+}

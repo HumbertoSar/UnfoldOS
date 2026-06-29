@@ -1,0 +1,49 @@
+.uf-diagnosis {
+  display: flex;
+  flex-direction: column;
+}
+
+.uf-diagnosis__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--uf-space-sm);
+  margin-bottom: var(--uf-space-md);
+}
+
+.uf-diagnosis__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--uf-space-2xs);
+  color: var(--uf-color-ink-tertiary);
+}
+
+.uf-diagnosis__score {
+  font-size: var(--uf-text-caption);
+  font-weight: var(--uf-weight-semibold);
+}
+
+.uf-diagnosis__title {
+  margin: 0;
+}
+
+.uf-diagnosis__status {
+  align-self: flex-start;
+  margin-top: var(--uf-space-xs);
+}
+
+.uf-diagnosis__desc {
+  margin-top: var(--uf-space-sm);
+  color: var(--uf-color-ink-secondary);
+  max-width: 42ch;
+}
+
+.uf-diagnosis__action {
+  align-self: flex-start;
+  margin-top: var(--uf-space-md);
+  margin-left: calc(-1 * var(--uf-space-sm));
+}
+
+.uf-brandmark {
+  display: block;
+}

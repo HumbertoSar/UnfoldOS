@@ -1,0 +1,126 @@
+.uf-card {
+  position: relative;
+  background: var(--uf-color-surface);
+  border: 1px solid var(--uf-color-border);
+  border-radius: var(--uf-radius-lg);
+  color: var(--uf-color-ink);
+  transition: box-shadow var(--uf-duration-base) var(--uf-ease-standard),
+    transform var(--uf-duration-base) var(--uf-ease-standard),
+    border-color var(--uf-duration-base) var(--uf-ease-standard);
+}
+
+/* Elevação */
+.uf-card--elev-0 {
+  box-shadow: var(--uf-elevation-0);
+}
+.uf-card--elev-1 {
+  box-shadow: var(--uf-elevation-1);
+}
+.uf-card--elev-2 {
+  box-shadow: var(--uf-elevation-2);
+}
+.uf-card--elev-3 {
+  box-shadow: var(--uf-elevation-3);
+}
+
+/* Espaçamento interno */
+.uf-card--pad-none {
+  padding: 0;
+}
+.uf-card--pad-sm {
+  padding: var(--uf-space-sm);
+}
+.uf-card--pad-md {
+  padding: var(--uf-space-lg);
+}
+.uf-card--pad-lg {
+  padding: var(--uf-space-xl);
+}
+
+/* Interativo — convida à manipulação, sobe suavemente */
+.uf-card--interactive {
+  cursor: pointer;
+}
+.uf-card--interactive:hover {
+  box-shadow: var(--uf-elevation-3);
+  transform: translateY(-2px);
+  border-color: var(--uf-color-border-strong);
+}
+.uf-card--interactive:focus-visible {
+  box-shadow: var(--uf-focus-ring), var(--uf-elevation-2);
+}
+
+/* Em formação — incompletude visível, sem pressa */
+.uf-card--forming {
+  border-style: dashed;
+  border-color: var(--uf-color-border-strong);
+  background: linear-gradient(
+    var(--uf-color-surface),
+    var(--uf-color-surface)
+  );
+}
+.uf-card--forming::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 9px,
+    rgba(36, 56, 90, 0.015) 9px,
+    rgba(36, 56, 90, 0.015) 18px
+  );
+  pointer-events: none;
+}
+
+/* Acento por afinidade — comunica grupo, não alarme */
+.uf-card--accent-primary {
+  border-left: 3px solid var(--uf-color-primary);
+}
+.uf-card--accent-positive {
+  border-left: 3px solid var(--uf-color-positive);
+}
+.uf-card--accent-attention {
+  border-left: 3px solid var(--uf-color-attention);
+}
+.uf-card--accent-forming {
+  border-left: 3px solid var(--uf-color-forming);
+}
+
+/* Composição interna */
+.uf-card__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--uf-space-2xs);
+  margin-bottom: var(--uf-space-xs);
+}
+.uf-card__eyebrow svg {
+  color: var(--uf-color-ink-tertiary);
+}
+
+.uf-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--uf-space-sm);
+  margin-bottom: var(--uf-space-sm);
+}
+
+.uf-card__title {
+  margin: 0;
+}
+
+.uf-card__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--uf-space-sm);
+  padding: var(--uf-space-xs) 0;
+}
+
+.uf-card__divider {
+  border: none;
+  border-top: 1px solid var(--uf-color-divider);
+  margin: var(--uf-space-sm) 0;
+}

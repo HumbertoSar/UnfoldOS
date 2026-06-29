@@ -1,0 +1,25 @@
+.uf-ring {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+}
+.uf-ring svg {
+  display: block;
+}
+.uf-ring__track {
+  fill: none;
+  stroke: var(--uf-color-border);
+}
+.uf-ring__value {
+  fill: none;
+  transition: stroke-dasharray var(--uf-duration-settle) var(--uf-ease-entrance);
+}
+.uf-ring__center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-weight: var(--uf-weight-semibold);
+  color: var(--uf-color-ink);
+  line-height: 1;
+}

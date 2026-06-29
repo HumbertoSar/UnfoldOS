@@ -1,5 +1,5 @@
 {
-  "name": "diagnostico-canva",
+  "name": "unfold-os",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.1.0",
     "openai": "^6.44.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
