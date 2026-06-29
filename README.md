@@ -1,8 +1,16 @@
-# Diagnóstico Canva ao Vivo
+# Unfold OS
+
+> Antes "Diagnóstico Canva". A conversa vira clareza.
 
 Protótipo de **canvas de vida e finanças** montado ao vivo durante a conversa consultor↔cliente.
 Reaproveita o motor de captação por voz do *Diagnóstico Financeiro* (STT + extração por IA com
 function calling), com **domínio e interface próprios** — foco em coleta de dados (sem score, por enquanto).
+
+## Design system
+
+A biblioteca de tokens, componentes e canvas do **Unfold OS** vive em `src/design-system/`
+(alias `@ds`). Veja `docs/principles.md` e `docs/tokens.md`. A migração das telas para o
+design system está em andamento (Fase 2 — re-skin gradual); detalhes em [`CLAUDE.md`](CLAUDE.md).
 
 ## Arquitetura do domínio (schema híbrido)
 
