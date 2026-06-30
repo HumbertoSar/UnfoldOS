@@ -20,8 +20,8 @@ const client = new OpenAI({
   baseURL: 'https://openrouter.ai/api/v1',
   apiKey: process.env.OPENROUTER_API_KEY || 'sk-missing',
   defaultHeaders: {
-    'HTTP-Referer': 'http://localhost:5173',
-    'X-Title': 'Diagnóstico Canva ao Vivo',
+    'HTTP-Referer': 'https://unfold.mvpsardenberg.cloud',
+    'X-Title': 'Unfold OS',
   },
 });
 
