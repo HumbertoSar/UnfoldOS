@@ -4,6 +4,7 @@ import { useSaudeServidor } from './store/useSaudeServidor';
 import { TelaInicio } from './ui/TelaInicio';
 import { Canvas } from './ui/Canvas';
 import { Toasts } from './ui/Toasts';
+import './ui/app.css';
 
 export default function App() {
   const sessaoIniciada = useCanvas((s) => s.sessaoIniciada);
@@ -15,7 +16,7 @@ export default function App() {
   }, [verificar]);
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900">
+    <div className="app">
       {sessaoIniciada ? <Canvas /> : <TelaInicio />}
       <Toasts />
     </div>

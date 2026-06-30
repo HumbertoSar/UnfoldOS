@@ -1,0 +1,355 @@
+/* =============================================================================
+   Unfold OS — layout das telas do app (re-skin Fase 2).
+   Só estrutura/espaçamento em tokens --uf-*. O visual dos cartões, botões e
+   badges vem dos componentes do design system.
+   ============================================================================= */
+
+/* --- Shell -------------------------------------------------------------- */
+.app {
+  min-height: 100vh;
+  color: var(--uf-color-ink);
+  background-color: var(--uf-color-bg);
+}
+
+/* --- Tela de início (consentimento) ------------------------------------- */
+.start {
+  margin: 0 auto;
+  display: flex;
+  min-height: 100vh;
+  max-width: 40rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--uf-space-2xl);
+  padding: var(--uf-space-xl);
+}
+
+.start__head {
+  text-align: center;
+}
+
+.start__lead {
+  margin-top: var(--uf-space-md);
+  color: var(--uf-color-ink-secondary);
+  max-width: 34rem;
+}
+
+.start__list {
+  margin: var(--uf-space-sm) 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--uf-space-xs);
+  color: var(--uf-color-ink-secondary);
+}
+
+.start__list li {
+  display: flex;
+  gap: var(--uf-space-xs);
+}
+
+.start__list li::before {
+  content: "•";
+  color: var(--uf-color-primary);
+}
+
+.start__note {
+  margin-top: var(--uf-space-md);
+  border-radius: var(--uf-radius-md);
+  background: var(--uf-color-attention-soft);
+  color: var(--uf-color-attention-ink);
+  padding: var(--uf-space-xs) var(--uf-space-sm);
+  font-size: var(--uf-text-label);
+}
+
+.start__note code {
+  font-family: var(--uf-font-mono);
+  font-size: 0.85em;
+}
+
+.start__cta {
+  margin-top: var(--uf-space-xl);
+}
+
+/* --- Barra de status do Canvas ------------------------------------------ */
+.statusbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--uf-space-md);
+  border-bottom: 1px solid var(--uf-color-border);
+  background: color-mix(in srgb, var(--uf-color-surface) 90%, transparent);
+  padding: var(--uf-space-sm) var(--uf-space-xl);
+  backdrop-filter: blur(8px);
+}
+
+.statusbar__group {
+  display: flex;
+  align-items: center;
+  gap: var(--uf-space-sm);
+}
+
+.statusbar__fase {
+  font-size: var(--uf-text-label);
+  color: var(--uf-color-ink-secondary);
+}
+
+/* --- Grade do Canvas ---------------------------------------------------- */
+.canvas {
+  padding-bottom: var(--uf-space-4xl);
+}
+
+.canvas__grid {
+  margin: 0 auto;
+  display: grid;
+  max-width: 72rem;
+  gap: var(--uf-space-md);
+  padding: var(--uf-space-xl);
+}
+
+.canvas__cards {
+  display: grid;
+  gap: var(--uf-space-md);
+}
+
+.canvas__side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--uf-space-md);
+}
+
+@media (min-width: 640px) {
+  .canvas__cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .canvas__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .canvas__cards {
+    grid-column: span 2 / span 2;
+  }
+}
+
+/* --- Linha de campo (rótulo → valor) ------------------------------------ */
+.field-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--uf-space-3xs);
+  margin: 0;
+}
+
+.field-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--uf-space-sm);
+  border-radius: var(--uf-radius-xs);
+  padding: var(--uf-space-3xs) var(--uf-space-xs);
+  font-size: var(--uf-text-label);
+  transition: background 0.2s ease;
+}
+
+.field-row.is-highlight {
+  background: var(--uf-color-accent-soft);
+}
+
+.field-row__label {
+  color: var(--uf-color-ink-tertiary);
+}
+
+.field-row__value {
+  font-weight: var(--uf-weight-medium);
+  color: var(--uf-color-ink);
+  text-align: right;
+}
+
+.field-row__value.is-empty {
+  color: var(--uf-color-ink-disabled);
+  font-weight: var(--uf-weight-regular);
+}
+
+/* --- Investimentos / observações ---------------------------------------- */
+.card-block {
+  margin-top: var(--uf-space-sm);
+  border-top: 1px solid var(--uf-color-divider);
+  padding-top: var(--uf-space-sm);
+}
+
+.invest-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--uf-space-2xs);
+}
+
+.invest-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--uf-text-label);
+  color: var(--uf-color-ink-secondary);
+}
+
+.invest-row strong {
+  font-weight: var(--uf-weight-medium);
+  color: var(--uf-color-ink);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--uf-space-2xs);
+}
+
+.muted {
+  color: var(--uf-color-ink-disabled);
+  font-size: var(--uf-text-label);
+}
+
+/* --- Resumo financeiro (superfície escura) ------------------------------ */
+.summary {
+  border-radius: var(--uf-radius-lg);
+  background: var(--uf-color-surface-inverse);
+  color: var(--uf-color-ink-on-dark);
+  padding: var(--uf-space-lg);
+  box-shadow: var(--uf-elevation-1);
+}
+
+.summary__value {
+  margin-top: var(--uf-space-2xs);
+}
+
+.summary__hint {
+  margin-top: var(--uf-space-2xs);
+  font-size: var(--uf-text-caption);
+  color: color-mix(in srgb, var(--uf-color-ink-on-dark) 55%, transparent);
+}
+
+.summary__meter {
+  margin-top: var(--uf-space-md);
+  border-top: 1px solid color-mix(in srgb, var(--uf-color-ink-on-dark) 15%, transparent);
+  padding-top: var(--uf-space-sm);
+}
+
+.summary__track {
+  margin-top: var(--uf-space-2xs);
+  height: 6px;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--uf-radius-full);
+  background: color-mix(in srgb, var(--uf-color-ink-on-dark) 15%, transparent);
+}
+
+.summary__fill {
+  height: 100%;
+  border-radius: var(--uf-radius-full);
+  background: var(--uf-color-positive);
+  transition: width 0.3s ease;
+}
+
+/* --- Transcrição -------------------------------------------------------- */
+.transcript__lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--uf-space-3xs);
+  font-size: var(--uf-text-label);
+  color: var(--uf-color-ink-secondary);
+}
+
+.transcript__lines .is-interim {
+  font-style: italic;
+  color: var(--uf-color-ink-tertiary);
+}
+
+.transcript__lines .is-empty {
+  color: var(--uf-color-ink-disabled);
+}
+
+/* --- Toasts ------------------------------------------------------------- */
+.toasts {
+  position: fixed;
+  bottom: var(--uf-space-md);
+  right: var(--uf-space-md);
+  z-index: 50;
+  display: flex;
+  width: 20rem;
+  flex-direction: column;
+  gap: var(--uf-space-xs);
+}
+
+.toast {
+  border-radius: var(--uf-radius-md);
+  padding: var(--uf-space-sm) var(--uf-space-md);
+  font-size: var(--uf-text-label);
+  color: var(--uf-color-ink-on-dark);
+  box-shadow: var(--uf-elevation-3);
+  animation: uf-toast-in 0.2s ease;
+}
+
+.toast--captura {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--uf-space-xs);
+  background: var(--uf-color-surface-inverse);
+}
+
+.toast--aviso {
+  background: var(--uf-color-attention);
+  color: var(--uf-color-ink-on-accent);
+}
+
+/* O design system não define cor de erro; usamos um vermelho-tinta sóbrio. */
+.toast--erro {
+  background: #b3261e;
+}
+
+.toast__undo {
+  flex-shrink: 0;
+  border-radius: var(--uf-radius-xs);
+  background: color-mix(in srgb, var(--uf-color-ink-on-dark) 15%, transparent);
+  padding: var(--uf-space-3xs) var(--uf-space-xs);
+  font-size: var(--uf-text-caption);
+  color: var(--uf-color-ink-on-dark);
+}
+
+.toast__undo:hover {
+  background: color-mix(in srgb, var(--uf-color-ink-on-dark) 25%, transparent);
+}
+
+@keyframes uf-toast-in {
+  from {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* --- Impressão / PDF ---------------------------------------------------- */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .canvas__grid {
+    display: block !important;
+  }
+  body {
+    background: #ffffff;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
+}

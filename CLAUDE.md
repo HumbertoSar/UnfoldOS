@@ -19,8 +19,9 @@ App full-stack que monta uma **canvas de vida e finanças ao vivo** durante a co
 Biblioteca de tokens `--uf-*` + ~20 componentes + canvas infinita. Alias `@ds` → `src/design-system`. Exports em `src/design-system/index.ts`. Docs em `docs/principles.md` e `docs/tokens.md`. Showcase de referência em `src/design-system/showcase/`.
 
 **Status da migração:**
-- ✅ **Fase 1**: design system integrado; tokens e fontes (`@fontsource/inter`) carregados no root (`src/main.tsx`). App roda igual ao anterior.
-- ⏳ **Fase 2 (pendente)**: re-skin gradual das telas (`src/ui`) com os componentes/tokens do design system, depois remover o Tailwind. `src/design-system/styles/global.css` só deve ser importado no fim (conflita com o preflight do Tailwind).
+- ✅ **Fase 1**: design system integrado; tokens e fontes (`@fontsource/inter`) carregados no root (`src/main.tsx`).
+- ✅ **Fase 2**: telas (`src/ui`) re-skinadas com componentes/tokens do design system (`Card`, `Button`, `Badge`, `Icon`, tipografia `uf-*`). **Tailwind removido** (sem `tailwind.config.js`/`index.css`); `src/design-system/styles/global.css` é a base única de estilos, importado em `src/main.tsx`. Layout das telas em `src/ui/app.css` (só estrutura, em tokens). Escolha de escopo: re-skin estático da grade atual — a canvas infinita (`InfiniteCanvas`/`UnfoldCard`) ainda **não** foi adotada na tela `Canvas`.
+- ⏳ **Fase 3 (opcional)**: migrar a tela `Canvas` para a experiência de canvas infinita arrastável do design system.
 
 ## Segredos / ambiente
 - Copie `.env.example` → `.env` e preencha `OPENROUTER_API_KEY` (usada **só** no servidor; nunca vai para o git nem para o navegador). Na nuvem/VM, configure a chave no ambiente.
