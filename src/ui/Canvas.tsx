@@ -1,7 +1,7 @@
 // Canvas ao vivo (Fase 3): barra de status + microfone fixos no topo e uma
 // canvas infinita onde cada seção é um nó arrastável que se preenche durante a
 // conversa. O motor de extração roda via useOrquestrador.
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useFala } from '../speech/falaStore';
 import { useCanvas } from '../store/useCanvas';
 import { useOrquestrador } from '../extraction/orquestrador';
@@ -195,7 +195,11 @@ function PainelTranscricao() {
 
 // "Mundo" lógico onde os nós vivem (usado para projetar o viewport no minimapa).
 const WORLD = { w: 1280, h: 1000 };
-const VIEW_INICIAL = { x: 24, y: 16, scale: 0.9 };
+const VIEW_INICIAL = { scale: 0.85 };
+// Centro do card "pessoa" (hub do layout radial) — usado pra centralizar a
+// viewport nele assim que o palco é medido, em vez de um pan fixo que só
+// funciona pra um tamanho de tela.
+const CENTRO_MUNDO = { x: 640, y: 480 };
 
 interface NoPos {
   id: string;
@@ -206,20 +210,19 @@ interface NoPos {
   tone: MinimapNode['tone'];
 }
 
-// 5 seções + patrimônio + transcrição. As posições iniciais deixam livres os
-// cantos ocupados pelos overlays (medidor à esq., minimapa à dir.): por isso o
-// nó "pessoa" começa mais abaixo, fora do medidor.
-// "pessoa" e "transcricao" entram juntos ao apertar Começar (por isso a cascata
-// curta entre eles); os demais entram cada um no seu próprio momento — quando a
-// seção captar o primeiro dado — então não precisam de atraso programado.
+// "pessoa" é o centro de tudo: fica no meio da canvas, e os outros 6 cards se
+// desdobram ao redor dele (layout radial). "pessoa" e "transcricao" entram
+// juntos ao apertar Começar; os demais entram cada um no seu momento — quando a
+// seção captar o primeiro dado — com um leve atraso crescente entre eles pra
+// dar a sensação de cascata se abrindo a partir do centro.
 const NOS_INICIAIS: NoPos[] = [
-  { id: 'pessoa', x: 40, y: 250, w: 300, delay: 0, tone: 'primary' },
-  { id: 'dependentes', x: 380, y: 40, w: 300, delay: 0, tone: 'neutral' },
-  { id: 'sonhos', x: 720, y: 40, w: 300, delay: 0, tone: 'primary' },
-  { id: 'financas', x: 40, y: 560, w: 340, delay: 0, tone: 'positive' },
-  { id: 'suitability', x: 420, y: 360, w: 300, delay: 0, tone: 'attention' },
-  { id: 'patrimonio', x: 800, y: 360, w: 300, delay: 0, tone: 'positive' },
-  { id: 'transcricao', x: 800, y: 640, w: 340, delay: 120, tone: 'neutral' },
+  { id: 'pessoa', x: 490, y: 395, w: 300, delay: 0, tone: 'primary' },
+  { id: 'sonhos', x: 490, y: 110, w: 300, delay: 60, tone: 'primary' },
+  { id: 'financas', x: 799, y: 200, w: 340, delay: 120, tone: 'positive' },
+  { id: 'patrimonio', x: 819, y: 550, w: 300, delay: 240, tone: 'positive' },
+  { id: 'transcricao', x: 470, y: 700, w: 340, delay: 120, tone: 'neutral' },
+  { id: 'suitability', x: 161, y: 530, w: 300, delay: 180, tone: 'attention' },
+  { id: 'dependentes', x: 161, y: 260, w: 300, delay: 0, tone: 'neutral' },
 ];
 
 function conteudoNo(id: string) {
@@ -260,16 +263,31 @@ export function Canvas() {
   const estado = useCanvas((s) => ({ dados: s.dados, investimentos: s.investimentos, observacoes: s.observacoes }));
   const nosVisiveis = nos.filter((n) => noVisivel(n.id, capturaIniciada, estado));
 
-  // Mede o palco para projetar o retângulo do viewport no minimapa.
+  // Mede o palco para projetar o retângulo do viewport no minimapa e, na
+  // primeira medição, centraliza a viewport no hub ("pessoa") — funciona pra
+  // qualquer tamanho de tela, ao contrário de um pan fixo.
+  const centralizouRef = useRef(false);
   useEffect(() => {
     const el = vp.containerRef.current;
     if (!el) return;
-    const medir = () => setSize({ w: el.clientWidth, h: el.clientHeight });
+    const medir = () => {
+      const w = el.clientWidth;
+      const h = el.clientHeight;
+      setSize({ w, h });
+      if (!centralizouRef.current && w > 0 && h > 0) {
+        centralizouRef.current = true;
+        vp.setViewport((atual) => ({
+          ...atual,
+          x: w / 2 - CENTRO_MUNDO.x * atual.scale,
+          y: h / 2 - CENTRO_MUNDO.y * atual.scale,
+        }));
+      }
+    };
     medir();
     const ro = new ResizeObserver(medir);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [vp.containerRef]);
+  }, [vp.containerRef, vp.setViewport]);
 
   const mover = (id: string, x: number, y: number) =>
     setNos((ns) => ns.map((n) => (n.id === id ? { ...n, x, y } : n)));

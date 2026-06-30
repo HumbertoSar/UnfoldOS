@@ -19,7 +19,7 @@ export interface Secao {
 
 // As 5 seções do canvas (ordem de exibição).
 export const SECOES: Secao[] = [
-  { chave: 'pessoa', titulo: 'Quem é a pessoa', descricao: 'Identidade, profissão e paixões' },
+  { chave: 'pessoa', titulo: 'Quem é Você?', descricao: 'Identidade, profissão e paixões' },
   { chave: 'dependentes', titulo: 'Dependentes', descricao: 'Família e pets que dependem dela' },
   { chave: 'sonhos', titulo: 'Sonhos e objetivos', descricao: 'O que ela quer realizar' },
   { chave: 'financas', titulo: 'Finanças', descricao: 'Patrimônio: o que tem e o que deve' },
