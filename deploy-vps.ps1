@@ -91,8 +91,11 @@ Write-Host "OK - Arquivos enviados" -ForegroundColor Green
 Write-Host ""
 
 # 5. SETUP NA VPS
+# Envia o .sh por scp (byte-a-byte, preserva LF/sem BOM) e roda la.
+# NAO usar "Get-Content | ssh bash": o pipe do PowerShell re-encoda em CRLF + BOM e o bash quebra.
 Write-Host "Step 5: Executando setup na VPS..." -ForegroundColor Yellow
-Get-Content "$env:TEMP\deploy-canva.sh" | ssh "${VPS_USER}@${VPS_IP}" bash
+scp -q "$env:TEMP\deploy-canva.sh" "${VPS_USER}@${VPS_IP}:/tmp/deploy-canva.sh"
+ssh "${VPS_USER}@${VPS_IP}" "bash /tmp/deploy-canva.sh"
 
 Write-Host ""
 Write-Host "Deploy concluido!" -ForegroundColor Green
