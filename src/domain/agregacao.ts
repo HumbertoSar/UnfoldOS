@@ -52,3 +52,19 @@ export function completudePorSecao(e: EstadoCanvas): CompletudeSecao[] {
     return { secao: s.chave, titulo: s.titulo, preenchidos, total };
   });
 }
+
+// A seção já captou algo (campo tipado, investimento ou observação do balde)?
+// Usado tanto pro estilo "em formação" do card quanto pra decidir se ele já
+// deve aparecer na canvas (revelação progressiva).
+export function secaoTemAlgumDado(secao: SecaoChave, e: EstadoCanvas): boolean {
+  const campos = camposDaSecao(secao);
+  const preenchido = (chave: string) => {
+    const v = e.dados[chave];
+    return v !== undefined && v !== '' && v !== null;
+  };
+  return (
+    campos.some((c) => preenchido(c.chave)) ||
+    (secao === 'financas' && e.investimentos.length > 0) ||
+    e.observacoes.some((o) => o.categoria === secao)
+  );
+}

@@ -6,7 +6,8 @@ import { useFala } from '../speech/falaStore';
 import { useCanvas } from '../store/useCanvas';
 import { useOrquestrador } from '../extraction/orquestrador';
 import { SECOES, camposDaSecao, type SecaoChave } from '../domain/registro';
-import { patrimonioLiquido, completudePorSecao } from '../domain/agregacao';
+import { patrimonioLiquido, completudePorSecao, secaoTemAlgumDado } from '../domain/agregacao';
+import type { EstadoCanvas } from '../domain/agregacao';
 import { moeda } from './format';
 import { Card, CardEyebrow, CardTitle } from '@ds/components/Card';
 import { Button } from '@ds/components/Button';
@@ -70,7 +71,8 @@ function CartaoSecao({ secao }: { secao: SecaoChave }) {
   const meta = SECOES.find((s) => s.chave === secao)!;
   const dados = useCanvas((s) => s.dados);
   const investimentos = useCanvas((s) => s.investimentos);
-  const observacoes = useCanvas((s) => s.observacoes).filter((o) => o.categoria === secao);
+  const observacoesTodas = useCanvas((s) => s.observacoes);
+  const observacoes = observacoesTodas.filter((o) => o.categoria === secao);
   const destaque = useCanvas((s) => s.campoEmDestaque);
   const campos = camposDaSecao(secao);
 
@@ -78,13 +80,8 @@ function CartaoSecao({ secao }: { secao: SecaoChave }) {
     const v = dados[chave];
     return v !== undefined && v !== '' && v !== null;
   };
-  // "Em formação" = a seção ainda não tem nada captado. Cada fonte é escopada à
-  // seção: campos tipados, investimentos (só em finanças) e observações (já
-  // filtradas por seção na linha acima).
-  const algumPreenchido =
-    campos.some((c) => preenchido(c.chave)) ||
-    (secao === 'financas' && investimentos.length > 0) ||
-    observacoes.length > 0;
+  // "Em formação" = a seção ainda não tem nada captado.
+  const algumPreenchido = secaoTemAlgumDado(secao, { dados, investimentos, observacoes: observacoesTodas });
 
   return (
     <Card as="section" elevation={1} padding="md" forming={!algumPreenchido}>
@@ -212,20 +209,33 @@ interface NoPos {
 // 5 seções + patrimônio + transcrição. As posições iniciais deixam livres os
 // cantos ocupados pelos overlays (medidor à esq., minimapa à dir.): por isso o
 // nó "pessoa" começa mais abaixo, fora do medidor.
+// "pessoa" e "transcricao" entram juntos ao apertar Começar (por isso a cascata
+// curta entre eles); os demais entram cada um no seu próprio momento — quando a
+// seção captar o primeiro dado — então não precisam de atraso programado.
 const NOS_INICIAIS: NoPos[] = [
   { id: 'pessoa', x: 40, y: 250, w: 300, delay: 0, tone: 'primary' },
-  { id: 'dependentes', x: 380, y: 40, w: 300, delay: 80, tone: 'neutral' },
-  { id: 'sonhos', x: 720, y: 40, w: 300, delay: 160, tone: 'primary' },
-  { id: 'financas', x: 40, y: 560, w: 340, delay: 240, tone: 'positive' },
-  { id: 'suitability', x: 420, y: 360, w: 300, delay: 320, tone: 'attention' },
-  { id: 'patrimonio', x: 800, y: 360, w: 300, delay: 400, tone: 'positive' },
-  { id: 'transcricao', x: 800, y: 640, w: 340, delay: 480, tone: 'neutral' },
+  { id: 'dependentes', x: 380, y: 40, w: 300, delay: 0, tone: 'neutral' },
+  { id: 'sonhos', x: 720, y: 40, w: 300, delay: 0, tone: 'primary' },
+  { id: 'financas', x: 40, y: 560, w: 340, delay: 0, tone: 'positive' },
+  { id: 'suitability', x: 420, y: 360, w: 300, delay: 0, tone: 'attention' },
+  { id: 'patrimonio', x: 800, y: 360, w: 300, delay: 0, tone: 'positive' },
+  { id: 'transcricao', x: 800, y: 640, w: 340, delay: 120, tone: 'neutral' },
 ];
 
 function conteudoNo(id: string) {
   if (id === 'patrimonio') return <ResumoFinanceiro />;
   if (id === 'transcricao') return <PainelTranscricao />;
   return <CartaoSecao secao={id as SecaoChave} />;
+}
+
+// Revelação progressiva: "pessoa" e "transcricao" entram ao apertar Começar;
+// os demais só quando a seção correspondente captar o primeiro dado.
+// "patrimonio" segue "financas", já que resume os mesmos campos.
+function noVisivel(id: string, capturaIniciada: boolean, estado: EstadoCanvas): boolean {
+  if (!capturaIniciada) return false;
+  if (id === 'pessoa' || id === 'transcricao') return true;
+  const secao = id === 'patrimonio' ? 'financas' : (id as SecaoChave);
+  return secaoTemAlgumDado(secao, estado);
 }
 
 // Percentual geral de coleta (alimenta o ConfidenceMeter do overlay).
@@ -243,6 +253,12 @@ export function Canvas() {
   const [nos, setNos] = useState<NoPos[]>(NOS_INICIAIS);
   const [size, setSize] = useState({ w: 1000, h: 600 });
   const pct = usePctColeta();
+
+  const capturaIniciada = useCanvas((s) => s.capturaIniciada);
+  const iniciarCaptura = useCanvas((s) => s.iniciarCaptura);
+  const iniciarFala = useFala((s) => s.iniciar);
+  const estado = useCanvas((s) => ({ dados: s.dados, investimentos: s.investimentos, observacoes: s.observacoes }));
+  const nosVisiveis = nos.filter((n) => noVisivel(n.id, capturaIniciada, estado));
 
   // Mede o palco para projetar o retângulo do viewport no minimapa.
   useEffect(() => {
@@ -265,7 +281,7 @@ export function Canvas() {
     w: size.w / vp.viewport.scale / WORLD.w,
     h: size.h / vp.viewport.scale / WORLD.h,
   };
-  const miniNodes: MinimapNode[] = nos.map((n) => ({
+  const miniNodes: MinimapNode[] = nosVisiveis.map((n) => ({
     x: n.x / WORLD.w,
     y: n.y / WORLD.h,
     w: n.w / WORLD.w,
@@ -306,9 +322,9 @@ export function Canvas() {
           containerRef={vp.containerRef}
           bind={vp.bind}
           isPanning={vp.isPanning}
-          overlay={overlay}
+          overlay={capturaIniciada ? overlay : undefined}
         >
-          {nos.map((n) => (
+          {nosVisiveis.map((n) => (
             <UnfoldCard
               key={n.id}
               x={n.x}
@@ -323,6 +339,20 @@ export function Canvas() {
             </UnfoldCard>
           ))}
         </InfiniteCanvas>
+        {!capturaIniciada && (
+          <div className="canvas-ov-start">
+            <Button
+              size="lg"
+              onClick={() => {
+                iniciarCaptura();
+                iniciarFala();
+              }}
+              trailingIcon={<Icon name="arrow-right" size={18} />}
+            >
+              Começar
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
