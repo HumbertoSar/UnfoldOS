@@ -4,7 +4,7 @@ $VPS_IP = "2.24.108.121"
 $VPS_USER = "root"
 $APP_DIR = "/opt/diagnostico-canva"
 $APP_PORT = 8788
-$SUBDOMAIN = "canva.mvpsardenberg.cloud"
+$SUBDOMAIN = "unfold.mvpsardenberg.cloud"
 $APP_NAME = "diagnostico-canva"
 
 Write-Host "Deploy para VPS - $APP_NAME" -ForegroundColor Cyan
@@ -24,7 +24,7 @@ $SCRIPT_CONTENT = @'
 set -e
 APP_DIR="/opt/diagnostico-canva"
 APP_PORT=8788
-SUBDOMAIN="canva.mvpsardenberg.cloud"
+SUBDOMAIN="unfold.mvpsardenberg.cloud"
 APP_NAME="diagnostico-canva"
 
 cd $APP_DIR
@@ -55,17 +55,21 @@ if echo "$RESPONSE" | grep -q "ok"; then echo "OK - App respondendo"; else echo 
 
 echo "Atualizando Caddyfile..."
 if [ -f /etc/caddy/Caddyfile ]; then cp /etc/caddy/Caddyfile /etc/caddy/Caddyfile.backup; fi
+echo "Removendo dominio antigo (canva) do Caddyfile, se existir..."
+if [ -f /etc/caddy/Caddyfile ]; then
+  awk 'skip==1{ if($0 ~ /\}/) skip=0; next } /^canva\.mvpsardenberg\.cloud[[:space:]]*\{/{ skip=1; next } { print }' /etc/caddy/Caddyfile > /etc/caddy/Caddyfile.tmp && mv /etc/caddy/Caddyfile.tmp /etc/caddy/Caddyfile
+fi
 if ! grep -q "^$SUBDOMAIN" /etc/caddy/Caddyfile; then
 cat >> /etc/caddy/Caddyfile << 'BLOCK'
 
-canva.mvpsardenberg.cloud {
+unfold.mvpsardenberg.cloud {
     reverse_proxy 127.0.0.1:8788
 }
 BLOCK
 fi
 systemctl reload caddy
 echo ""
-echo "Sucesso! Acesse: https://canva.mvpsardenberg.cloud"
+echo "Sucesso! Acesse: https://unfold.mvpsardenberg.cloud"
 '@
 # Grava LF + sem BOM: Out-File -Encoding UTF8 (PS 5.1) põe BOM e CRLF, e o bash da VPS quebra.
 [System.IO.File]::WriteAllText("$env:TEMP\deploy-canva.sh", ($SCRIPT_CONTENT -replace "`r`n", "`n"), (New-Object System.Text.UTF8Encoding $false))
@@ -92,4 +96,4 @@ Get-Content "$env:TEMP\deploy-canva.sh" | ssh "${VPS_USER}@${VPS_IP}" bash
 
 Write-Host ""
 Write-Host "Deploy concluido!" -ForegroundColor Green
-Write-Host "URL: https://canva.mvpsardenberg.cloud" -ForegroundColor Cyan
+Write-Host "URL: https://unfold.mvpsardenberg.cloud" -ForegroundColor Cyan

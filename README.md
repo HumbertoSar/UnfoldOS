@@ -38,4 +38,4 @@ Quem é a pessoa · Dependentes (incl. pets) · Sonhos e objetivos · Finanças 
 
 ## Deploy
 `vps-infra.md` do projeto irmão descreve a VPS. Este app roda na porta **8788** sob
-`canva.mvpsardenberg.cloud`. Use `deploy-vps.ps1`.
+`unfold.mvpsardenberg.cloud`. Use `deploy-vps.ps1`.

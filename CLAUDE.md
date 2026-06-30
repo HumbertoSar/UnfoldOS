@@ -26,4 +26,4 @@ Biblioteca de tokens `--uf-*` + ~20 componentes + canvas infinita. Alias `@ds` �
 - Copie `.env.example` → `.env` e preencha `OPENROUTER_API_KEY` (usada **só** no servidor; nunca vai para o git nem para o navegador). Na nuvem/VM, configure a chave no ambiente.
 
 ## Deploy
-`deploy-vps.ps1` (PowerShell) → VPS com PM2 + Caddy, porta 8788, `canva.mvpsardenberg.cloud`. Front buildado é servido pelo próprio Express.
+`deploy-vps.ps1` (PowerShell) → VPS com PM2 + Caddy, porta 8788, `unfold.mvpsardenberg.cloud`. Front buildado é servido pelo próprio Express.
