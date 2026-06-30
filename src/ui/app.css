@@ -1,15 +1,9 @@
 /* =============================================================================
    Unfold OS — layout das telas do app (re-skin Fase 2).
    Só estrutura/espaçamento em tokens --uf-*. O visual dos cartões, botões e
-   badges vem dos componentes do design system.
+   badges vem dos componentes do design system. O reset, o fundo e a cor de
+   texto base vêm do global.css (body/#root) — não os repetimos aqui.
    ============================================================================= */
-
-/* --- Shell -------------------------------------------------------------- */
-.app {
-  min-height: 100vh;
-  color: var(--uf-color-ink);
-  background-color: var(--uf-color-bg);
-}
 
 /* --- Tela de início (consentimento) ------------------------------------- */
 .start {
@@ -170,7 +164,6 @@
 }
 
 .field-row__value.is-empty {
-  color: var(--uf-color-ink-disabled);
   font-weight: var(--uf-weight-regular);
 }
 
@@ -208,8 +201,15 @@
   gap: var(--uf-space-2xs);
 }
 
-.muted {
+/* Texto-placeholder (vazio/desabilitado) — cor compartilhada por toda a UI:
+   o "—" de investimentos, o valor de campo vazio e "Aguardando a conversa…". */
+.muted,
+.field-row__value.is-empty,
+.transcript__lines .is-empty {
   color: var(--uf-color-ink-disabled);
+}
+
+.muted {
   font-size: var(--uf-text-label);
 }
 
@@ -268,10 +268,6 @@
   color: var(--uf-color-ink-tertiary);
 }
 
-.transcript__lines .is-empty {
-  color: var(--uf-color-ink-disabled);
-}
-
 /* --- Toasts ------------------------------------------------------------- */
 .toasts {
   position: fixed;
@@ -306,9 +302,8 @@
   color: var(--uf-color-ink-on-accent);
 }
 
-/* O design system não define cor de erro; usamos um vermelho-tinta sóbrio. */
 .toast--erro {
-  background: #b3261e;
+  background: var(--uf-color-negative);
 }
 
 .toast__undo {
@@ -340,7 +335,8 @@
   .no-print {
     display: none !important;
   }
-  .canvas__grid {
+  .canvas__grid,
+  .canvas__cards {
     display: block !important;
   }
   body {

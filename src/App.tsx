@@ -16,9 +16,9 @@ export default function App() {
   }, [verificar]);
 
   return (
-    <div className="app">
+    <>
       {sessaoIniciada ? <Canvas /> : <TelaInicio />}
       <Toasts />
-    </div>
+    </>
   );
 }

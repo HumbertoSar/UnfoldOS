@@ -1,9 +1,9 @@
 // Tela de início: aviso de consentimento (LGPD) antes de ligar o microfone.
 import { useCanvas } from '../store/useCanvas';
 import { useSaudeServidor } from '../store/useSaudeServidor';
-import { Card } from '../design-system/components/Card';
-import { Button } from '../design-system/components/Button';
-import { Icon } from '../design-system/components/Icon';
+import { Card } from '@ds/components/Card';
+import { Button } from '@ds/components/Button';
+import { Icon } from '@ds/components/Icon';
 
 export function TelaInicio() {
   const iniciarSessao = useCanvas((s) => s.iniciarSessao);

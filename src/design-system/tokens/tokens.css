@@ -127,6 +127,10 @@
   --uf-color-neutral-soft: var(--uf-neutral-100);
   --uf-color-neutral-ink: var(--uf-neutral-600);
 
+  /* Negativo — reservado a erros reais (ex.: falha de servidor). O sistema
+     comunica estados por tom, mas um erro legítimo precisa se destacar. */
+  --uf-color-negative: #b3261e;
+
   /* Diagnóstico "em formação" — incompletude visível, sem pressa */
   --uf-color-forming: var(--uf-indigo-300);
   --uf-color-forming-soft: var(--uf-indigo-50);

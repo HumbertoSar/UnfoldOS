@@ -6,11 +6,11 @@ import { useOrquestrador } from '../extraction/orquestrador';
 import { SECOES, camposDaSecao, type SecaoChave } from '../domain/registro';
 import { patrimonioLiquido, completudePorSecao } from '../domain/agregacao';
 import { moeda } from './format';
-import { Card, CardEyebrow, CardTitle } from '../design-system/components/Card';
-import { Button } from '../design-system/components/Button';
-import { Badge } from '../design-system/components/Badge';
-import { Icon } from '../design-system/components/Icon';
-import type { IconName } from '../design-system/components/Icon';
+import { Card, CardEyebrow, CardTitle } from '@ds/components/Card';
+import { Button } from '@ds/components/Button';
+import { Badge } from '@ds/components/Badge';
+import { Icon } from '@ds/components/Icon';
+import type { IconName } from '@ds/components/Icon';
 
 const ICONE_SECAO: Record<SecaoChave, IconName> = {
   pessoa: 'user',
@@ -69,7 +69,13 @@ function CartaoSecao({ secao }: { secao: SecaoChave }) {
     const v = dados[chave];
     return v !== undefined && v !== '' && v !== null;
   };
-  const algumPreenchido = campos.some((c) => preenchido(c.chave)) || investimentos.length > 0;
+  // "Em formação" = a seção ainda não tem nada captado. Cada fonte é escopada à
+  // seção: campos tipados, investimentos (só em finanças) e observações (já
+  // filtradas por seção na linha acima).
+  const algumPreenchido =
+    campos.some((c) => preenchido(c.chave)) ||
+    (secao === 'financas' && investimentos.length > 0) ||
+    observacoes.length > 0;
 
   return (
     <Card as="section" elevation={1} padding="md" forming={!algumPreenchido}>
@@ -146,8 +152,15 @@ function ResumoFinanceiro() {
       <p className="uf-title-2 summary__value">{moeda(pl)}</p>
       <p className="summary__hint">investimentos + imóveis + reserva − dívidas</p>
       <div className="summary__meter">
-        <p className="summary__hint">Coleta: {totalPreench}/{totalCampos} campos</p>
-        <div className="summary__track">
+        <p className="summary__hint" id="coleta-label">Coleta: {totalPreench}/{totalCampos} campos</p>
+        <div
+          className="summary__track"
+          role="progressbar"
+          aria-labelledby="coleta-label"
+          aria-valuenow={totalPreench}
+          aria-valuemin={0}
+          aria-valuemax={totalCampos}
+        >
           <div className="summary__fill" style={{ width: `${pct}%` }} />
         </div>
       </div>
