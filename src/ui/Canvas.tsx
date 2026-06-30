@@ -1,5 +1,7 @@
-// Canvas ao vivo: barra de status + microfone, 5 cartões de seção que se preenchem
-// durante a conversa, e o painel de transcrição. O motor de extração roda via useOrquestrador.
+// Canvas ao vivo (Fase 3): barra de status + microfone fixos no topo e uma
+// canvas infinita onde cada seção é um nó arrastável que se preenche durante a
+// conversa. O motor de extração roda via useOrquestrador.
+import { useState, useEffect } from 'react';
 import { useFala } from '../speech/falaStore';
 import { useCanvas } from '../store/useCanvas';
 import { useOrquestrador } from '../extraction/orquestrador';
@@ -11,6 +13,13 @@ import { Button } from '@ds/components/Button';
 import { Badge } from '@ds/components/Badge';
 import { Icon } from '@ds/components/Icon';
 import type { IconName } from '@ds/components/Icon';
+import { ConfidenceMeter } from '@ds/components/ConfidenceMeter';
+import { Minimap } from '@ds/components/Minimap';
+import type { MinimapNode } from '@ds/components/Minimap';
+import { ZoomControls } from '@ds/components/ZoomControls';
+import { InfiniteCanvas } from '@ds/canvas/InfiniteCanvas';
+import { UnfoldCard } from '@ds/canvas/UnfoldCard';
+import { useCanvasViewport } from '@ds/canvas/useCanvasViewport';
 
 const ICONE_SECAO: Record<SecaoChave, IconName> = {
   pessoa: 'user',
@@ -185,20 +194,135 @@ function PainelTranscricao() {
   );
 }
 
+// --- Canvas infinita ------------------------------------------------------
+
+// "Mundo" lógico onde os nós vivem (usado para projetar o viewport no minimapa).
+const WORLD = { w: 1280, h: 1000 };
+const VIEW_INICIAL = { x: 24, y: 16, scale: 0.9 };
+
+interface NoPos {
+  id: string;
+  x: number;
+  y: number;
+  w: number;
+  delay: number; // atraso da animação de desdobramento (cascata)
+  tone: MinimapNode['tone'];
+}
+
+// 5 seções + patrimônio + transcrição. As posições iniciais deixam livres os
+// cantos ocupados pelos overlays (medidor à esq., minimapa à dir.): por isso o
+// nó "pessoa" começa mais abaixo, fora do medidor.
+const NOS_INICIAIS: NoPos[] = [
+  { id: 'pessoa', x: 40, y: 250, w: 300, delay: 0, tone: 'primary' },
+  { id: 'dependentes', x: 380, y: 40, w: 300, delay: 80, tone: 'neutral' },
+  { id: 'sonhos', x: 720, y: 40, w: 300, delay: 160, tone: 'primary' },
+  { id: 'financas', x: 40, y: 560, w: 340, delay: 240, tone: 'positive' },
+  { id: 'suitability', x: 420, y: 360, w: 300, delay: 320, tone: 'attention' },
+  { id: 'patrimonio', x: 800, y: 360, w: 300, delay: 400, tone: 'positive' },
+  { id: 'transcricao', x: 800, y: 640, w: 340, delay: 480, tone: 'neutral' },
+];
+
+function conteudoNo(id: string) {
+  if (id === 'patrimonio') return <ResumoFinanceiro />;
+  if (id === 'transcricao') return <PainelTranscricao />;
+  return <CartaoSecao secao={id as SecaoChave} />;
+}
+
+// Percentual geral de coleta (alimenta o ConfidenceMeter do overlay).
+function usePctColeta() {
+  const estado = useCanvas((s) => ({ dados: s.dados, investimentos: s.investimentos, observacoes: s.observacoes }));
+  const completude = completudePorSecao(estado);
+  const preench = completude.reduce((s, c) => s + c.preenchidos, 0);
+  const total = completude.reduce((s, c) => s + c.total, 0);
+  return total ? Math.round((preench / total) * 100) : 0;
+}
+
 export function Canvas() {
   useOrquestrador(); // liga o motor de extração à transcrição
+  const vp = useCanvasViewport(VIEW_INICIAL);
+  const [nos, setNos] = useState<NoPos[]>(NOS_INICIAIS);
+  const [size, setSize] = useState({ w: 1000, h: 600 });
+  const pct = usePctColeta();
+
+  // Mede o palco para projetar o retângulo do viewport no minimapa.
+  useEffect(() => {
+    const el = vp.containerRef.current;
+    if (!el) return;
+    const medir = () => setSize({ w: el.clientWidth, h: el.clientHeight });
+    medir();
+    const ro = new ResizeObserver(medir);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [vp.containerRef]);
+
+  const mover = (id: string, x: number, y: number) =>
+    setNos((ns) => ns.map((n) => (n.id === id ? { ...n, x, y } : n)));
+
+  // Viewport e nós em coordenadas normalizadas (0–1) do "mundo", para o minimapa.
+  const view = {
+    x: -vp.viewport.x / vp.viewport.scale / WORLD.w,
+    y: -vp.viewport.y / vp.viewport.scale / WORLD.h,
+    w: size.w / vp.viewport.scale / WORLD.w,
+    h: size.h / vp.viewport.scale / WORLD.h,
+  };
+  const miniNodes: MinimapNode[] = nos.map((n) => ({
+    x: n.x / WORLD.w,
+    y: n.y / WORLD.h,
+    w: n.w / WORLD.w,
+    h: 0.14,
+    tone: n.tone,
+  }));
+
+  const overlay = (
+    <>
+      <div className="canvas-ov-meter">
+        <ConfidenceMeter value={pct} label="Coleta da conversa" caption={`${pct}% mapeado`} />
+      </div>
+      <div className="canvas-ov-minimap">
+        <Minimap nodes={miniNodes} viewport={view} />
+      </div>
+      <div className="canvas-ov-zoom">
+        <ZoomControls
+          zoom={vp.viewport.scale * 100}
+          onZoomIn={vp.zoomIn}
+          onZoomOut={vp.zoomOut}
+          onReset={vp.reset}
+        />
+      </div>
+      <div className="canvas-ov-hint">
+        <Icon name="recenter" size={14} />
+        Arraste os cards · arraste o fundo para mover · Ctrl/⌘ + scroll para zoom
+      </div>
+    </>
+  );
 
   return (
-    <div className="canvas">
+    <div className="canvas-screen">
       <BarraStatus />
-      <div className="canvas__grid">
-        <div className="canvas__cards">
-          {SECOES.map((s) => <CartaoSecao key={s.chave} secao={s.chave} />)}
-        </div>
-        <div className="canvas__side">
-          <ResumoFinanceiro />
-          <PainelTranscricao />
-        </div>
+      <div className="canvas-stage">
+        <InfiniteCanvas
+          className="canvas-stage__canvas"
+          viewport={vp.viewport}
+          containerRef={vp.containerRef}
+          bind={vp.bind}
+          isPanning={vp.isPanning}
+          overlay={overlay}
+        >
+          {nos.map((n) => (
+            <UnfoldCard
+              key={n.id}
+              x={n.x}
+              y={n.y}
+              width={n.w}
+              scale={vp.viewport.scale}
+              draggable
+              onMove={(x, y) => mover(n.id, x, y)}
+              unfoldDelay={n.delay}
+            >
+              {conteudoNo(n.id)}
+            </UnfoldCard>
+          ))}
+        </InfiniteCanvas>
       </div>
     </div>
   );

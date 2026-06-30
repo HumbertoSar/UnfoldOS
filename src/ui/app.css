@@ -92,43 +92,64 @@
   color: var(--uf-color-ink-secondary);
 }
 
-/* --- Grade do Canvas ---------------------------------------------------- */
-.canvas {
-  padding-bottom: var(--uf-space-4xl);
-}
-
-.canvas__grid {
-  margin: 0 auto;
-  display: grid;
-  max-width: 72rem;
-  gap: var(--uf-space-md);
-  padding: var(--uf-space-xl);
-}
-
-.canvas__cards {
-  display: grid;
-  gap: var(--uf-space-md);
-}
-
-.canvas__side {
+/* --- Canvas infinita (palco + overlays) --------------------------------- */
+.canvas-screen {
   display: flex;
   flex-direction: column;
-  gap: var(--uf-space-md);
+  height: 100vh;
 }
 
-@media (min-width: 640px) {
-  .canvas__cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+.canvas-stage {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
 }
 
-@media (min-width: 1024px) {
-  .canvas__grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  .canvas__cards {
-    grid-column: span 2 / span 2;
-  }
+.canvas-stage__canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* Overlays fixos na viewport (não sofrem pan/zoom) */
+.canvas-ov-meter {
+  position: absolute;
+  left: var(--uf-space-lg);
+  top: var(--uf-space-lg);
+  width: 220px;
+  padding: var(--uf-space-md);
+  background: color-mix(in srgb, var(--uf-color-surface) 86%, transparent);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--uf-color-border);
+  border-radius: var(--uf-radius-lg);
+  box-shadow: var(--uf-elevation-2);
+}
+
+.canvas-ov-minimap {
+  position: absolute;
+  right: var(--uf-space-lg);
+  top: var(--uf-space-lg);
+}
+
+.canvas-ov-zoom {
+  position: absolute;
+  right: var(--uf-space-lg);
+  bottom: var(--uf-space-lg);
+}
+
+.canvas-ov-hint {
+  position: absolute;
+  left: 50%;
+  bottom: var(--uf-space-lg);
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--uf-space-xs);
+  padding: var(--uf-space-xs) var(--uf-space-md);
+  background: color-mix(in srgb, var(--uf-color-surface-inverse) 82%, transparent);
+  color: var(--uf-color-ink-on-dark);
+  border-radius: var(--uf-radius-full);
+  font-size: var(--uf-text-caption);
+  box-shadow: var(--uf-elevation-3);
 }
 
 /* --- Linha de campo (rótulo → valor) ------------------------------------ */
@@ -334,10 +355,6 @@
 @media print {
   .no-print {
     display: none !important;
-  }
-  .canvas__grid,
-  .canvas__cards {
-    display: block !important;
   }
   body {
     background: #ffffff;
