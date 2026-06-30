@@ -4,6 +4,16 @@
 import { create } from 'zustand';
 import { WebSpeechProvider, type SpeechProvider } from './SpeechProvider';
 import { useCanvas } from '../store/useCanvas';
+import { useToasts } from '../store/useToasts';
+
+// Mensagens amigáveis pros códigos de erro do Web Speech API (ver SpeechProvider).
+const MENSAGENS_ERRO_MIC: Record<string, string> = {
+  'not-allowed': 'Permissão de microfone negada — libere o acesso nas configurações do navegador e clique em "Retomar microfone".',
+  'service-not-allowed': 'O navegador bloqueou o serviço de reconhecimento de voz.',
+  'audio-capture': 'Nenhum microfone encontrado.',
+  network: 'Falha de rede no reconhecimento de voz. Verifique sua conexão e tente de novo.',
+  'language-not-supported': 'Reconhecimento em pt-BR não suportado neste navegador.',
+};
 
 interface EstadoFala {
   suportado: boolean;
@@ -33,7 +43,10 @@ function obterProvider(set: (p: Partial<EstadoFala>) => void): SpeechProvider {
     }
   });
 
-  p.onErro((mensagem) => set({ erro: mensagem }));
+  p.onErro((mensagem) => {
+    set({ erro: mensagem });
+    useToasts.getState().adicionarErro(MENSAGENS_ERRO_MIC[mensagem] ?? `Erro no microfone: ${mensagem}`);
+  });
 
   p.onStatus((ativo) => {
     set({ ativo });
@@ -56,7 +69,9 @@ export const useFala = create<EstadoFala>((set) => ({
   iniciar: () => {
     const p = obterProvider(set);
     if (!p.suportado) {
-      set({ erro: 'Web Speech API não suportada neste navegador. Use Chrome ou Edge.' });
+      const mensagem = 'Web Speech API não suportada neste navegador. Use Chrome ou Edge.';
+      set({ erro: mensagem });
+      useToasts.getState().adicionarErro(mensagem);
       return;
     }
     set({ erro: null });

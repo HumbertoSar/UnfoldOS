@@ -15,6 +15,15 @@ export interface SpeechProvider {
   onStatus(cb: (ativo: boolean) => void): void;
 }
 
+// Erros permanentes: tentar reiniciar não resolve (sem permissão/dispositivo/serviço).
+// Para esses, encerramos a sessão em vez de entrar em loop de retry.
+const ERROS_FATAIS = new Set([
+  'not-allowed',
+  'service-not-allowed',
+  'audio-capture',
+  'language-not-supported',
+]);
+
 export class WebSpeechProvider implements SpeechProvider {
   private rec: SpeechRecognition | null = null;
   private ativo = false; // intenção do usuário (continuar ouvindo?)
@@ -45,9 +54,9 @@ export class WebSpeechProvider implements SpeechProvider {
 
       rec.onerror = (event) => {
         // 'no-speech' e 'aborted' são esperados; só reportamos os relevantes.
-        if (event.error !== 'no-speech' && event.error !== 'aborted') {
-          this.cbErro(event.error);
-        }
+        if (event.error === 'no-speech' || event.error === 'aborted') return;
+        if (ERROS_FATAIS.has(event.error)) this.ativo = false;
+        this.cbErro(event.error);
       };
 
       rec.onend = () => {
