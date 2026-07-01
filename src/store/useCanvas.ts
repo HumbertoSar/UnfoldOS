@@ -17,6 +17,7 @@ export interface Observacao {
   categoria: string; // SecaoChave (string para não acoplar o balde ao enum rígido)
   chave: string; // rótulo curto do que foi observado ("gosta de futebol", "pet")
   valor: string; // detalhe ("torce pro Flamengo", "cachorro chamado Bob")
+  tipoInteresse?: string; // TipoInteresse — só quando é uma "paixão" (balão flutuante)
 }
 
 export interface CapturaLog {

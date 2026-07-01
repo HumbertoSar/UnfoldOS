@@ -74,6 +74,28 @@ export const LISTA_INVESTIMENTOS = {
 // Tudo que não tem campo tipado cai aqui, marcado pela seção a que pertence.
 export const CATEGORIAS_BALDE: SecaoChave[] = ['pessoa', 'dependentes', 'sonhos', 'financas', 'suitability'];
 
+// Sub-classificação OPCIONAL de uma observação do balde: só quando ela é uma
+// "paixão" divertida de mostrar na canvas (balão flutuante com emoji). A
+// maioria das observações não se encaixa em nenhum tipo — não é obrigatório.
+export type TipoInteresse =
+  | 'futebol'
+  | 'viagem'
+  | 'filme-serie'
+  | 'livro'
+  | 'arte'
+  | 'pet'
+  | 'natureza';
+
+export const TIPOS_INTERESSE: TipoInteresse[] = [
+  'futebol',
+  'viagem',
+  'filme-serie',
+  'livro',
+  'arte',
+  'pet',
+  'natureza',
+];
+
 // ---- Derivados (não editar; saem do REGISTRO) -------------------------------
 
 export type ChaveCampo = string;

@@ -1,0 +1,74 @@
+.baloes-interesse {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--uf-z-toast);
+}
+
+.balao-interesse {
+  position: absolute;
+  translate: -50% -50%; /* centraliza no ponto — separado de `transform`, que a
+    animação de entrada usa, pra elas não brigarem entre si. */
+  animation: uf-balao-entrada var(--uf-duration-unfold) var(--uf-ease-spring) both;
+}
+
+.balao-interesse__corpo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--uf-space-2xs);
+  padding: var(--uf-space-2xs) var(--uf-space-sm);
+  border-radius: var(--uf-radius-full);
+  background: var(--uf-color-surface);
+  color: var(--uf-color-ink);
+  box-shadow: var(--uf-elevation-2);
+  font-size: var(--uf-text-label);
+  white-space: nowrap;
+  animation: uf-balao-flutuar 3.4s ease-in-out 0.5s infinite;
+}
+
+.balao-interesse__emoji {
+  font-size: 20px;
+  line-height: 1;
+}
+
+@keyframes uf-balao-entrada {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes uf-balao-flutuar {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .balao-interesse {
+    animation: uf-balao-fade var(--uf-duration-base) var(--uf-ease-standard) both;
+  }
+  .balao-interesse__corpo {
+    animation: none;
+  }
+  @keyframes uf-balao-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}

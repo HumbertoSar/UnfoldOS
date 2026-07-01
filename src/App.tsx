@@ -4,6 +4,7 @@ import { useSaudeServidor } from './store/useSaudeServidor';
 import { TelaInicio } from './ui/TelaInicio';
 import { Canvas } from './ui/Canvas';
 import { Toasts } from './ui/Toasts';
+import { BaloesInteresse } from './ui/BaloesInteresse';
 import './ui/app.css';
 
 export default function App() {
@@ -19,6 +20,7 @@ export default function App() {
     <>
       {sessaoIniciada ? <Canvas /> : <TelaInicio />}
       <Toasts />
+      <BaloesInteresse />
     </>
   );
 }
