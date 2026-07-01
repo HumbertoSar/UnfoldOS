@@ -234,16 +234,17 @@ interface NoPos {
 // "pessoa" é o centro de tudo: fica no meio da canvas, e os outros 6 cards se
 // desdobram ao redor dele (layout radial). "pessoa" e "transcricao" entram
 // juntos ao apertar Começar; os demais entram cada um no seu momento — quando a
-// seção captar o primeiro dado — com um leve atraso crescente entre eles pra
-// dar a sensação de cascata se abrindo a partir do centro.
+// seção captar o primeiro dado. Os atrasos são bem espaçados (250ms+) de
+// propósito: quando a IA capta várias seções de uma vez só (uma frase longa),
+// os cards precisam continuar entrando um de cada vez, não todos juntos.
 const NOS_INICIAIS: NoPos[] = [
   { id: 'pessoa', x: 490, y: 395, w: 300, delay: 0, tone: 'primary' },
-  { id: 'sonhos', x: 490, y: 110, w: 300, delay: 60, tone: 'primary' },
-  { id: 'financas', x: 799, y: 200, w: 340, delay: 120, tone: 'positive' },
-  { id: 'patrimonio', x: 819, y: 550, w: 300, delay: 240, tone: 'positive' },
-  { id: 'transcricao', x: 470, y: 700, w: 340, delay: 120, tone: 'neutral' },
-  { id: 'suitability', x: 161, y: 530, w: 300, delay: 180, tone: 'attention' },
+  { id: 'transcricao', x: 470, y: 700, w: 340, delay: 220, tone: 'neutral' },
   { id: 'dependentes', x: 161, y: 260, w: 300, delay: 0, tone: 'neutral' },
+  { id: 'sonhos', x: 490, y: 110, w: 300, delay: 250, tone: 'primary' },
+  { id: 'suitability', x: 161, y: 530, w: 300, delay: 500, tone: 'attention' },
+  { id: 'financas', x: 799, y: 200, w: 340, delay: 750, tone: 'positive' },
+  { id: 'patrimonio', x: 819, y: 550, w: 300, delay: 1000, tone: 'positive' },
 ];
 
 function conteudoNo(id: string) {

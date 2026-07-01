@@ -320,7 +320,15 @@
   font-size: var(--uf-text-label);
   color: var(--uf-color-ink-on-dark);
   box-shadow: var(--uf-elevation-3);
-  animation: uf-toast-in 0.2s ease;
+  /* `both` segura o estado inicial durante o atraso (por instância, ver
+     Toasts.tsx) — sem isso o toast "pisca" cheio antes de deslizar. */
+  animation: uf-toast-in 0.25s ease both;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.toast--saindo {
+  opacity: 0;
+  transform: translateX(20px) scale(0.96);
 }
 
 .toast--captura {
@@ -377,5 +385,6 @@
 @media (prefers-reduced-motion: reduce) {
   .toast {
     animation: none;
+    transition: none;
   }
 }
