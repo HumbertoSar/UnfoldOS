@@ -112,8 +112,22 @@ export const useCanvas = create<EstadoCanvasStore>()(
       addInvestimento: (inv) =>
         set((s) => ({ investimentos: [...s.investimentos, inv] })),
 
+      // "chave" é a chave mesmo: se já existe uma observação com a mesma
+      // categoria+chave, atualiza o valor em vez de duplicar. Sem isso, a IA
+      // reformulando o mesmo fato ("duas filhas, 9 e 4" / "filha de 9 e filha
+      // de 4") virava dois chips repetidos no card.
       addObservacao: (obs) =>
-        set((s) => ({ observacoes: [...s.observacoes, { ...obs, id: idUnico() }] })),
+        set((s) => {
+          const existente = s.observacoes.find((o) => o.categoria === obs.categoria && o.chave === obs.chave);
+          if (existente) {
+            return {
+              observacoes: s.observacoes.map((o) =>
+                o.id === existente.id ? { ...o, valor: obs.valor, tipoInteresse: obs.tipoInteresse ?? o.tipoInteresse } : o,
+              ),
+            };
+          }
+          return { observacoes: [...s.observacoes, { ...obs, id: idUnico() }] };
+        }),
 
       desfazer: (id) => {
         const { dados, log, travados } = get();
