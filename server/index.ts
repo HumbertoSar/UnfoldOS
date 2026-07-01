@@ -6,7 +6,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import OpenAI from 'openai';
-import { CHAVES_ESCALARES, CATEGORIAS_BALDE, guiaCampos } from '../src/domain/registro';
+import { CHAVES_ESCALARES, CATEGORIAS_BALDE, TIPOS_INTERESSE, guiaCampos } from '../src/domain/registro';
 import { registrar } from './log';
 
 const app = express();
@@ -39,10 +39,22 @@ Há TRÊS destinos para o que você captar:
 3) observacoes — o BALDE. Tudo que NÃO tem campo tipado mas é relevante para conhecer a pessoa:
    paixões/gostos (futebol e time, café, leitura, filmes, viagem), família e PETS, sonhos e
    objetivos, contexto de vida. Cada item: {categoria, chave (rótulo curto), valor (detalhe),
-   confidence, evidence}. categoria ∈ [${CATEGORIAS_BALDE.join(', ')}].
+   tipoInteresse (opcional), confidence, evidence}. categoria ∈ [${CATEGORIAS_BALDE.join(', ')}].
+
+   tipoInteresse é OPCIONAL: preencha só quando o item for uma PAIXÃO/HOBBY divertido de
+   destacar, com um dos valores em [${TIPOS_INTERESSE.join(', ')}]. A maioria das observações
+   (sonhos, dependentes, contexto) NÃO tem tipoInteresse — deixe de fora nesses casos.
+   Para tipoInteresse:"futebol", o valor DEVE ser o nome do TIME (não "futebol" de novo).
+
    Exemplos:
-   - "torço pro Flamengo" → observacoes:[{categoria:"pessoa", chave:"Futebol", valor:"Flamengo"}]
-   - "tenho um cachorro, o Bob" → observacoes:[{categoria:"dependentes", chave:"Pet", valor:"cachorro Bob"}]
+   - "torço pro Flamengo" → observacoes:[{categoria:"pessoa", chave:"Futebol", valor:"Flamengo", tipoInteresse:"futebol"}]
+   - "sou vascaíno roxo" → observacoes:[{categoria:"pessoa", chave:"Futebol", valor:"Vasco", tipoInteresse:"futebol"}]
+   - "adoro viajar" → observacoes:[{categoria:"pessoa", chave:"Viagem", valor:"", tipoInteresse:"viagem"}]
+   - "vivo maratonando série" → observacoes:[{categoria:"pessoa", chave:"Séries", valor:"", tipoInteresse:"filme-serie"}]
+   - "leio muito, adoro um livro" → observacoes:[{categoria:"pessoa", chave:"Leitura", valor:"", tipoInteresse:"livro"}]
+   - "curto museu, pintura" → observacoes:[{categoria:"pessoa", chave:"Arte", valor:"", tipoInteresse:"arte"}]
+   - "amo trilha, natureza" → observacoes:[{categoria:"pessoa", chave:"Natureza", valor:"", tipoInteresse:"natureza"}]
+   - "tenho um cachorro, o Bob" → observacoes:[{categoria:"dependentes", chave:"Pet", valor:"cachorro Bob", tipoInteresse:"pet"}]
    - "quero comprar uma casa na praia" → observacoes:[{categoria:"sonhos", chave:"Casa na praia", valor:""}]
    - "meu filho Lucas tem 16" → observacoes:[{categoria:"dependentes", chave:"Filho", valor:"Lucas, 16"}]
 
@@ -133,6 +145,11 @@ const ferramenta: OpenAI.Chat.Completions.ChatCompletionTool = {
               categoria: { type: 'string', enum: CATEGORIAS_BALDE },
               chave: { type: 'string', description: 'Rótulo curto.' },
               valor: { type: 'string', description: 'Detalhe (pode ser vazio).' },
+              tipoInteresse: {
+                type: 'string',
+                enum: TIPOS_INTERESSE,
+                description: 'Opcional: só quando for uma paixão/hobby divertido de destacar.',
+              },
               confidence: { type: 'number', minimum: 0, maximum: 1 },
               evidence: { type: 'string' },
             },

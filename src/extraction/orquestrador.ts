@@ -5,9 +5,11 @@ import { useEffect, useRef } from 'react';
 import { useFala } from '../speech/falaStore';
 import { useCanvas } from '../store/useCanvas';
 import { useToasts } from '../store/useToasts';
+import { useBaloes } from '../store/useBaloes';
 import { useSaudeServidor } from '../store/useSaudeServidor';
 import { CHAVES_ESCALARES, ROTULOS } from '../domain/registro';
 import { coagirValor } from '../domain/coercao';
+import { infoInteresse, detectarTimeCarioca } from '../domain/interesses';
 import {
   extrair,
   type ModoExtracao,
@@ -108,6 +110,7 @@ function aplicarInvestimentos(itens: InvestimentoExtraido[]): number {
 function aplicarObservacoes(itens: ObservacaoExtraida[]): number {
   const { addObservacao, observacoes } = useCanvas.getState();
   const adicionar = useToasts.getState().adicionar;
+  const adicionarBalao = useBaloes.getState().adicionar;
   let aplicados = 0;
   for (const o of itens) {
     if (!o.chave) continue;
@@ -117,9 +120,23 @@ function aplicarObservacoes(itens: ObservacaoExtraida[]): number {
       (x) => x.categoria === o.categoria && x.chave === o.chave && x.valor === (o.valor ?? ''),
     );
     if (jaExiste) continue;
-    addObservacao({ categoria: o.categoria, chave: o.chave, valor: o.valor ?? '' });
+    addObservacao({ categoria: o.categoria, chave: o.chave, valor: o.valor ?? '', tipoInteresse: o.tipoInteresse });
     adicionar({ rotulo: o.chave, valor: o.valor ?? '✓', correcao: false });
-    registrarEvento('observacao_adicionada', { categoria: o.categoria, chave: o.chave });
+    registrarEvento('observacao_adicionada', { categoria: o.categoria, chave: o.chave, tipoInteresse: o.tipoInteresse });
+
+    // Paixão detectada (futebol, viagem, filme/série, livro, arte, pet, natureza)
+    // → balão flutuante e divertido, longe dos cards.
+    if (o.tipoInteresse) {
+      const { emoji, texto } = infoInteresse(o.tipoInteresse);
+      const time = o.tipoInteresse === 'futebol' ? detectarTimeCarioca(o.valor ?? '') : null;
+      adicionarBalao({
+        emoji,
+        texto,
+        detalhe: time?.nome ?? (o.valor || undefined),
+        bg: time?.bg,
+        fg: time?.fg,
+      });
+    }
     aplicados++;
   }
   return aplicados;

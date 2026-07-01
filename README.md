@@ -34,7 +34,7 @@ Pensado para **iterar barato** — a estrutura endurece com o tempo:
 4. Abra **http://localhost:5174** no **Chrome ou Edge**.
 
 ## Seções do canvas
-Quem é a pessoa · Dependentes (incl. pets) · Sonhos e objetivos · Finanças (patrimônio) · Suitability
+Quem é Você? · Dependentes (incl. pets) · Sonhos e objetivos · Finanças (patrimônio) · Suitability
 
 ## Deploy
 `vps-infra.md` do projeto irmão descreve a VPS. Este app roda na porta **8788** sob

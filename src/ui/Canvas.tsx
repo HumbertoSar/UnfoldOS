@@ -1,16 +1,17 @@
 // Canvas ao vivo (Fase 3): barra de status + microfone fixos no topo e uma
 // canvas infinita onde cada seção é um nó arrastável que se preenche durante a
 // conversa. O motor de extração roda via useOrquestrador.
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useFala } from '../speech/falaStore';
 import { useCanvas } from '../store/useCanvas';
 import { useOrquestrador } from '../extraction/orquestrador';
 import { SECOES, camposDaSecao, type SecaoChave } from '../domain/registro';
-import { patrimonioLiquido, completudePorSecao } from '../domain/agregacao';
+import { patrimonioLiquido, completudePorSecao, secaoTemAlgumDado } from '../domain/agregacao';
+import type { EstadoCanvas } from '../domain/agregacao';
 import { moeda } from './format';
 import { Card, CardEyebrow, CardTitle } from '@ds/components/Card';
 import { Button } from '@ds/components/Button';
-import { Badge } from '@ds/components/Badge';
+import { Badge, ConfidenceDots } from '@ds/components/Badge';
 import { Icon } from '@ds/components/Icon';
 import type { IconName } from '@ds/components/Icon';
 import { ConfidenceMeter } from '@ds/components/ConfidenceMeter';
@@ -70,7 +71,8 @@ function CartaoSecao({ secao }: { secao: SecaoChave }) {
   const meta = SECOES.find((s) => s.chave === secao)!;
   const dados = useCanvas((s) => s.dados);
   const investimentos = useCanvas((s) => s.investimentos);
-  const observacoes = useCanvas((s) => s.observacoes).filter((o) => o.categoria === secao);
+  const observacoesTodas = useCanvas((s) => s.observacoes);
+  const observacoes = observacoesTodas.filter((o) => o.categoria === secao);
   const destaque = useCanvas((s) => s.campoEmDestaque);
   const campos = camposDaSecao(secao);
 
@@ -78,19 +80,31 @@ function CartaoSecao({ secao }: { secao: SecaoChave }) {
     const v = dados[chave];
     return v !== undefined && v !== '' && v !== null;
   };
-  // "Em formação" = a seção ainda não tem nada captado. Cada fonte é escopada à
-  // seção: campos tipados, investimentos (só em finanças) e observações (já
-  // filtradas por seção na linha acima).
-  const algumPreenchido =
-    campos.some((c) => preenchido(c.chave)) ||
-    (secao === 'financas' && investimentos.length > 0) ||
-    observacoes.length > 0;
+  // "Em formação" = a seção ainda não tem nada captado.
+  const algumPreenchido = secaoTemAlgumDado(secao, { dados, investimentos, observacoes: observacoesTodas });
+
+  // Completude só faz sentido pra seções com campos tipados (pessoa, finanças,
+  // suitability) — dependentes/sonhos são balde aberto, sem um "total" fixo.
+  const completude = completudePorSecao({ dados, investimentos, observacoes: observacoesTodas }).find(
+    (c) => c.secao === secao,
+  );
+  const mostrarCompletude = campos.length > 0 && completude !== undefined;
 
   return (
     <Card as="section" elevation={1} padding="md" forming={!algumPreenchido}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--uf-space-xs)' }}>
-        <Icon name={ICONE_SECAO[secao]} size={18} />
-        <CardTitle>{meta.titulo}</CardTitle>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--uf-space-xs)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--uf-space-xs)' }}>
+          <Icon name={ICONE_SECAO[secao]} size={18} />
+          <CardTitle>{meta.titulo}</CardTitle>
+        </div>
+        {mostrarCompletude && (
+          <ConfidenceDots
+            level={completude.preenchidos}
+            total={completude.total}
+            label={`${completude.preenchidos} de ${completude.total} campos`}
+            size={6}
+          />
+        )}
       </div>
       <p className="muted" style={{ marginBottom: 'var(--uf-space-sm)' }}>{meta.descricao}</p>
 
@@ -198,7 +212,11 @@ function PainelTranscricao() {
 
 // "Mundo" lógico onde os nós vivem (usado para projetar o viewport no minimapa).
 const WORLD = { w: 1280, h: 1000 };
-const VIEW_INICIAL = { x: 24, y: 16, scale: 0.9 };
+const VIEW_INICIAL = { scale: 0.85 };
+// Centro do card "pessoa" (hub do layout radial) — usado pra centralizar a
+// viewport nele assim que o palco é medido, em vez de um pan fixo que só
+// funciona pra um tamanho de tela.
+const CENTRO_MUNDO = { x: 640, y: 480 };
 
 interface NoPos {
   id: string;
@@ -209,23 +227,35 @@ interface NoPos {
   tone: MinimapNode['tone'];
 }
 
-// 5 seções + patrimônio + transcrição. As posições iniciais deixam livres os
-// cantos ocupados pelos overlays (medidor à esq., minimapa à dir.): por isso o
-// nó "pessoa" começa mais abaixo, fora do medidor.
+// "pessoa" é o centro de tudo: fica no meio da canvas, e os outros 6 cards se
+// desdobram ao redor dele (layout radial). "pessoa" e "transcricao" entram
+// juntos ao apertar Começar; os demais entram cada um no seu momento — quando a
+// seção captar o primeiro dado — com um leve atraso crescente entre eles pra
+// dar a sensação de cascata se abrindo a partir do centro.
 const NOS_INICIAIS: NoPos[] = [
-  { id: 'pessoa', x: 40, y: 250, w: 300, delay: 0, tone: 'primary' },
-  { id: 'dependentes', x: 380, y: 40, w: 300, delay: 80, tone: 'neutral' },
-  { id: 'sonhos', x: 720, y: 40, w: 300, delay: 160, tone: 'primary' },
-  { id: 'financas', x: 40, y: 560, w: 340, delay: 240, tone: 'positive' },
-  { id: 'suitability', x: 420, y: 360, w: 300, delay: 320, tone: 'attention' },
-  { id: 'patrimonio', x: 800, y: 360, w: 300, delay: 400, tone: 'positive' },
-  { id: 'transcricao', x: 800, y: 640, w: 340, delay: 480, tone: 'neutral' },
+  { id: 'pessoa', x: 490, y: 395, w: 300, delay: 0, tone: 'primary' },
+  { id: 'sonhos', x: 490, y: 110, w: 300, delay: 60, tone: 'primary' },
+  { id: 'financas', x: 799, y: 200, w: 340, delay: 120, tone: 'positive' },
+  { id: 'patrimonio', x: 819, y: 550, w: 300, delay: 240, tone: 'positive' },
+  { id: 'transcricao', x: 470, y: 700, w: 340, delay: 120, tone: 'neutral' },
+  { id: 'suitability', x: 161, y: 530, w: 300, delay: 180, tone: 'attention' },
+  { id: 'dependentes', x: 161, y: 260, w: 300, delay: 0, tone: 'neutral' },
 ];
 
 function conteudoNo(id: string) {
   if (id === 'patrimonio') return <ResumoFinanceiro />;
   if (id === 'transcricao') return <PainelTranscricao />;
   return <CartaoSecao secao={id as SecaoChave} />;
+}
+
+// Revelação progressiva: "pessoa" e "transcricao" entram ao apertar Começar;
+// os demais só quando a seção correspondente captar o primeiro dado.
+// "patrimonio" segue "financas", já que resume os mesmos campos.
+function noVisivel(id: string, capturaIniciada: boolean, estado: EstadoCanvas): boolean {
+  if (!capturaIniciada) return false;
+  if (id === 'pessoa' || id === 'transcricao') return true;
+  const secao = id === 'patrimonio' ? 'financas' : (id as SecaoChave);
+  return secaoTemAlgumDado(secao, estado);
 }
 
 // Percentual geral de coleta (alimenta o ConfidenceMeter do overlay).
@@ -244,16 +274,37 @@ export function Canvas() {
   const [size, setSize] = useState({ w: 1000, h: 600 });
   const pct = usePctColeta();
 
-  // Mede o palco para projetar o retângulo do viewport no minimapa.
+  const capturaIniciada = useCanvas((s) => s.capturaIniciada);
+  const iniciarCaptura = useCanvas((s) => s.iniciarCaptura);
+  const iniciarFala = useFala((s) => s.iniciar);
+  const estado = useCanvas((s) => ({ dados: s.dados, investimentos: s.investimentos, observacoes: s.observacoes }));
+  const nosVisiveis = nos.filter((n) => noVisivel(n.id, capturaIniciada, estado));
+
+  // Mede o palco para projetar o retângulo do viewport no minimapa e, na
+  // primeira medição, centraliza a viewport no hub ("pessoa") — funciona pra
+  // qualquer tamanho de tela, ao contrário de um pan fixo.
+  const centralizouRef = useRef(false);
   useEffect(() => {
     const el = vp.containerRef.current;
     if (!el) return;
-    const medir = () => setSize({ w: el.clientWidth, h: el.clientHeight });
+    const medir = () => {
+      const w = el.clientWidth;
+      const h = el.clientHeight;
+      setSize({ w, h });
+      if (!centralizouRef.current && w > 0 && h > 0) {
+        centralizouRef.current = true;
+        vp.setViewport((atual) => ({
+          ...atual,
+          x: w / 2 - CENTRO_MUNDO.x * atual.scale,
+          y: h / 2 - CENTRO_MUNDO.y * atual.scale,
+        }));
+      }
+    };
     medir();
     const ro = new ResizeObserver(medir);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [vp.containerRef]);
+  }, [vp.containerRef, vp.setViewport]);
 
   const mover = (id: string, x: number, y: number) =>
     setNos((ns) => ns.map((n) => (n.id === id ? { ...n, x, y } : n)));
@@ -265,7 +316,7 @@ export function Canvas() {
     w: size.w / vp.viewport.scale / WORLD.w,
     h: size.h / vp.viewport.scale / WORLD.h,
   };
-  const miniNodes: MinimapNode[] = nos.map((n) => ({
+  const miniNodes: MinimapNode[] = nosVisiveis.map((n) => ({
     x: n.x / WORLD.w,
     y: n.y / WORLD.h,
     w: n.w / WORLD.w,
@@ -306,9 +357,9 @@ export function Canvas() {
           containerRef={vp.containerRef}
           bind={vp.bind}
           isPanning={vp.isPanning}
-          overlay={overlay}
+          overlay={capturaIniciada ? overlay : undefined}
         >
-          {nos.map((n) => (
+          {nosVisiveis.map((n) => (
             <UnfoldCard
               key={n.id}
               x={n.x}
@@ -323,6 +374,20 @@ export function Canvas() {
             </UnfoldCard>
           ))}
         </InfiniteCanvas>
+        {!capturaIniciada && (
+          <div className="canvas-ov-start">
+            <Button
+              size="lg"
+              onClick={() => {
+                iniciarCaptura();
+                iniciarFala();
+              }}
+              trailingIcon={<Icon name="arrow-right" size={18} />}
+            >
+              Começar
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -17,6 +17,7 @@ export interface Observacao {
   categoria: string; // SecaoChave (string para não acoplar o balde ao enum rígido)
   chave: string; // rótulo curto do que foi observado ("gosta de futebol", "pet")
   valor: string; // detalhe ("torce pro Flamengo", "cachorro chamado Bob")
+  tipoInteresse?: string; // TipoInteresse — só quando é uma "paixão" (balão flutuante)
 }
 
 export interface CapturaLog {
@@ -36,11 +37,13 @@ interface EstadoCanvasStore {
   travados: Record<string, boolean>;
   log: CapturaLog[];
   sessaoIniciada: boolean;
+  capturaIniciada: boolean;
   campoEmDestaque: string | null;
   statusFase: string;
 
   iniciarSessao: () => void;
   encerrarSessao: () => void;
+  iniciarCaptura: () => void;
   setStatusFase: (fase: string) => void;
 
   setCampo: (campo: string, valor: unknown, origem?: Origem) => string | null;
@@ -66,11 +69,13 @@ export const useCanvas = create<EstadoCanvasStore>()(
       travados: {},
       log: [],
       sessaoIniciada: false,
+      capturaIniciada: false,
       campoEmDestaque: null,
       statusFase: 'Pronto para ouvir',
 
       iniciarSessao: () => set({ sessaoIniciada: true, statusFase: 'Coletando dados…' }),
       encerrarSessao: () => set({ sessaoIniciada: false, statusFase: 'Sessão encerrada' }),
+      iniciarCaptura: () => set({ capturaIniciada: true, statusFase: 'Ouvindo a conversa…' }),
       setStatusFase: (fase) => set({ statusFase: fase }),
 
       setCampo: (campo, valor, origem = 'manual') => {
@@ -133,6 +138,7 @@ export const useCanvas = create<EstadoCanvasStore>()(
           log: [],
           campoEmDestaque: null,
           sessaoIniciada: false,
+          capturaIniciada: false,
         }),
     }),
     {

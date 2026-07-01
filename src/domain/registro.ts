@@ -19,7 +19,7 @@ export interface Secao {
 
 // As 5 seções do canvas (ordem de exibição).
 export const SECOES: Secao[] = [
-  { chave: 'pessoa', titulo: 'Quem é a pessoa', descricao: 'Identidade, profissão e paixões' },
+  { chave: 'pessoa', titulo: 'Quem é Você?', descricao: 'Identidade, profissão e paixões' },
   { chave: 'dependentes', titulo: 'Dependentes', descricao: 'Família e pets que dependem dela' },
   { chave: 'sonhos', titulo: 'Sonhos e objetivos', descricao: 'O que ela quer realizar' },
   { chave: 'financas', titulo: 'Finanças', descricao: 'Patrimônio: o que tem e o que deve' },
@@ -73,6 +73,28 @@ export const LISTA_INVESTIMENTOS = {
 // BALDE — categorias válidas para observações soltas (exploratório).
 // Tudo que não tem campo tipado cai aqui, marcado pela seção a que pertence.
 export const CATEGORIAS_BALDE: SecaoChave[] = ['pessoa', 'dependentes', 'sonhos', 'financas', 'suitability'];
+
+// Sub-classificação OPCIONAL de uma observação do balde: só quando ela é uma
+// "paixão" divertida de mostrar na canvas (balão flutuante com emoji). A
+// maioria das observações não se encaixa em nenhum tipo — não é obrigatório.
+export type TipoInteresse =
+  | 'futebol'
+  | 'viagem'
+  | 'filme-serie'
+  | 'livro'
+  | 'arte'
+  | 'pet'
+  | 'natureza';
+
+export const TIPOS_INTERESSE: TipoInteresse[] = [
+  'futebol',
+  'viagem',
+  'filme-serie',
+  'livro',
+  'arte',
+  'pet',
+  'natureza',
+];
 
 // ---- Derivados (não editar; saem do REGISTRO) -------------------------------
 

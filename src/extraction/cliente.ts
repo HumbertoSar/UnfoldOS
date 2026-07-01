@@ -18,6 +18,7 @@ export interface ObservacaoExtraida {
   categoria: string; // seção a que pertence
   chave: string; // rótulo curto
   valor: string; // detalhe
+  tipoInteresse?: string; // TipoInteresse — só quando é uma "paixão" divertida
   confidence: number;
   evidence: string;
 }
