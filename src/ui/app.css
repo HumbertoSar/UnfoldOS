@@ -111,17 +111,29 @@
 }
 
 /* Overlays fixos na viewport (não sofrem pan/zoom) */
-.canvas-ov-meter {
+.canvas-ov-meter-stack {
   position: absolute;
   left: var(--uf-space-lg);
   top: var(--uf-space-lg);
   width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--uf-space-sm);
+}
+
+.canvas-ov-meter {
   padding: var(--uf-space-md);
   background: color-mix(in srgb, var(--uf-color-surface) 86%, transparent);
   backdrop-filter: blur(8px);
   border: 1px solid var(--uf-color-border);
   border-radius: var(--uf-radius-lg);
   box-shadow: var(--uf-elevation-2);
+}
+
+/* O painel de transcrição já traz seu próprio Card (fundo/borda/sombra) —
+   aqui só garantimos que ele ocupe a largura da pilha. */
+.canvas-ov-transcricao {
+  width: 100%;
 }
 
 .canvas-ov-minimap {

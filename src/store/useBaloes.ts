@@ -14,6 +14,7 @@ export interface Balao {
 interface EstadoBaloes {
   baloes: Balao[];
   adicionar: (b: Omit<Balao, 'id'>) => void;
+  limpar: () => void;
 }
 
 function idUnico(): string {
@@ -23,4 +24,5 @@ function idUnico(): string {
 export const useBaloes = create<EstadoBaloes>((set) => ({
   baloes: [],
   adicionar: (b) => set((s) => ({ baloes: [...s.baloes, { ...b, id: idUnico() }] })),
+  limpar: () => set({ baloes: [] }),
 }));

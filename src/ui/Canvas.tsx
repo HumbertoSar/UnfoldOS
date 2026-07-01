@@ -4,6 +4,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useFala } from '../speech/falaStore';
 import { useCanvas } from '../store/useCanvas';
+import { useBaloes } from '../store/useBaloes';
 import { useOrquestrador } from '../extraction/orquestrador';
 import { SECOES, camposDaSecao, type SecaoChave } from '../domain/registro';
 import { patrimonioLiquido, completudePorSecao, secaoTemAlgumDado } from '../domain/agregacao';
@@ -38,6 +39,7 @@ function BarraStatus() {
   const parar = useFala((s) => s.parar);
   const limparFala = useFala((s) => s.limpar);
   const limparTudo = useCanvas((s) => s.limparTudo);
+  const limparBaloes = useBaloes((s) => s.limpar);
 
   return (
     <div className="statusbar no-print">
@@ -58,6 +60,7 @@ function BarraStatus() {
             if (confirm('Limpar todos os dados e a transcrição?')) {
               limparTudo();
               limparFala();
+              limparBaloes();
             }
           }}
         >
@@ -231,15 +234,14 @@ interface NoPos {
   tone: MinimapNode['tone'];
 }
 
-// "pessoa" é o centro de tudo: fica no meio da canvas, e os outros 6 cards se
-// desdobram ao redor dele (layout radial). "pessoa" e "transcricao" entram
-// juntos ao apertar Começar; os demais entram cada um no seu momento — quando a
-// seção captar o primeiro dado. Os atrasos são bem espaçados (250ms+) de
-// propósito: quando a IA capta várias seções de uma vez só (uma frase longa),
-// os cards precisam continuar entrando um de cada vez, não todos juntos.
+// "pessoa" é o centro de tudo: fica no meio da canvas, e os outros 5 cards se
+// desdobram ao redor dele (layout radial — "transcricao" virou overlay fixo,
+// ver Canvas()). "pessoa" entra ao apertar Começar; os demais entram cada um
+// no seu momento — quando a seção captar o primeiro dado. Os atrasos são bem
+// espaçados (250ms+) de propósito: quando a IA capta várias seções de uma vez
+// só (uma frase longa), os cards precisam continuar entrando um de cada vez.
 const NOS_INICIAIS: NoPos[] = [
   { id: 'pessoa', x: 490, y: 395, w: 300, delay: 0, tone: 'primary' },
-  { id: 'transcricao', x: 470, y: 700, w: 340, delay: 220, tone: 'neutral' },
   { id: 'dependentes', x: 161, y: 260, w: 300, delay: 0, tone: 'neutral' },
   { id: 'sonhos', x: 490, y: 110, w: 300, delay: 250, tone: 'primary' },
   { id: 'suitability', x: 161, y: 530, w: 300, delay: 500, tone: 'attention' },
@@ -249,7 +251,6 @@ const NOS_INICIAIS: NoPos[] = [
 
 function conteudoNo(id: string) {
   if (id === 'patrimonio') return <ResumoFinanceiro />;
-  if (id === 'transcricao') return <PainelTranscricao />;
   if (id === 'pessoa') {
     return (
       <>
@@ -261,12 +262,12 @@ function conteudoNo(id: string) {
   return <CartaoSecao secao={id as SecaoChave} />;
 }
 
-// Revelação progressiva: "pessoa" e "transcricao" entram ao apertar Começar;
-// os demais só quando a seção correspondente captar o primeiro dado.
-// "patrimonio" segue "financas", já que resume os mesmos campos.
+// Revelação progressiva: "pessoa" entra ao apertar Começar; os demais só
+// quando a seção correspondente captar o primeiro dado. "patrimonio" segue
+// "financas", já que resume os mesmos campos.
 function noVisivel(id: string, capturaIniciada: boolean, estado: EstadoCanvas): boolean {
   if (!capturaIniciada) return false;
-  if (id === 'pessoa' || id === 'transcricao') return true;
+  if (id === 'pessoa') return true;
   const secao = id === 'patrimonio' ? 'financas' : (id as SecaoChave);
   return secaoTemAlgumDado(secao, estado);
 }
@@ -339,8 +340,13 @@ export function Canvas() {
 
   const overlay = (
     <>
-      <div className="canvas-ov-meter">
-        <ConfidenceMeter value={pct} label="Coleta da conversa" caption={`${pct}% mapeado`} />
+      <div className="canvas-ov-meter-stack">
+        <div className="canvas-ov-meter">
+          <ConfidenceMeter value={pct} label="Coleta da conversa" caption={`${pct}% mapeado`} />
+        </div>
+        <div className="canvas-ov-transcricao">
+          <PainelTranscricao />
+        </div>
       </div>
       <div className="canvas-ov-minimap">
         <Minimap nodes={miniNodes} viewport={view} />
