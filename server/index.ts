@@ -37,6 +37,9 @@ Há TRÊS destinos para o que você captar:
    (fundo, previdência, FGTS, ação, CDB, tesouro, poupança, participação em empresa). Item NOVO
    por investimento; nunca some nem sobrescreva. Ex.: "já tenho investido para previdência 500
    mil" → investimentos:[{nome:"previdência", valor:500000}] — NUNCA em imoveis ou outro campo.
+   Se a pessoa disser que TEM dinheiro investido mas NÃO nomear o veículo ("tenho 3 milhões já
+   investidos"), ainda assim vai para investimentos, com nome:"investimentos" (genérico) — NUNCA
+   tente colocar isso em updates (não existe campo tipado "investimentos").
 3) observacoes — o BALDE. Tudo que NÃO tem campo tipado mas é relevante para conhecer a pessoa:
    paixões/gostos (futebol e time, café, leitura, filmes, viagem), família e PETS, sonhos e
    objetivos, contexto de vida. Cada item: {categoria, chave (rótulo curto), valor (detalhe),
@@ -93,8 +96,18 @@ REGRAS:
 7c. IDADE DE APOSENTADORIA ≠ idade atual nem horizonteAnos. "Quero me aposentar com X anos" é
    objetivo (categoria sonhos) — NUNCA sobrescreve idade (que só muda se a pessoa disser a idade
    dela de verdade, tipo "eu tenho X anos") nem vira horizonteAnos (que é sobre quanto tempo
-   pretende deixar o DINHEIRO investido, não sobre quando se aposentar). Ex.: "quero me aposentar
-   com 65 anos" → observacoes:[{categoria:"sonhos", chave:"Aposentadoria", valor:"aos 65 anos"}].
+   pretende deixar o DINHEIRO investido, não sobre quando se aposentar). PROIBIDO calcular
+   horizonteAnos subtraindo a idade atual da idade de aposentadoria dita — mesmo que pareça fazer
+   sentido matemático, NÃO FAÇA essa conta; não é isso que o campo significa. Ex.: "quero me
+   aposentar com 65 anos" → observacoes:[{categoria:"sonhos", chave:"Aposentadoria",
+   valor:"aos 65 anos"}], e updates FICA VAZIO.
+7d. PLANO DE SAÚDE ≠ SEGURO DE VIDA. coberturaSeguro é só do seguro de VIDA. "Tenho plano de
+   saúde" não tem campo tipado — vai para observacoes (categoria financas ou pessoa), nunca em
+   coberturaSeguro nem possuiSeguroVida.
+7e. experienciaInvestimentos é sobre o NÍVEL DE EXPERIÊNCIA que a pessoa descreve de si mesma
+   ("iniciante", "nunca investi", "muita experiência", "sou investidor há 10 anos") — não é pra
+   preencher só porque ela citou ter dinheiro num veículo específico (isso já vira um item em
+   investimentos, não precisa duplicar aqui).
 8. Não repita um valor já presente NAQUELE MESMO campo/observação, a menos que tenha mudado.
    Campos diferentes NUNCA são duplicata um do outro.
 9. Se for ambíguo ou conversa fiada, não registre. Prefira o BALDE a forçar um campo tipado:

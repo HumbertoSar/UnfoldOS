@@ -24,6 +24,21 @@ const GATILHOS_CORRECAO = ['altere', 'altera', 'corrige', 'corrigir', 'corrija',
 const LIMIAR_CONFIANCA = 0.7;
 const DEBOUNCE_MS = 2500;
 
+// Confusões conhecidas do modelo de extração, vistas repetidas vezes em sessões
+// reais mesmo com o prompt reforçado (ver server/index.ts, regras 7c/7d): ele
+// insiste em calcular horizonteAnos a partir de "aposentar" e, às vezes, também
+// ecoa o valor da previdência no campo imoveis. Rede de segurança determinística
+// — não depende do modelo obedecer o prompt.
+const PADROES_SUSPEITOS: Partial<Record<string, RegExp>> = {
+  horizonteAnos: /aposent/i,
+  imoveis: /previd[eê]ncia/i,
+};
+
+function evidenciaSuspeita(field: string, evidence: string): boolean {
+  const padrao = PADROES_SUSPEITOS[field];
+  return padrao ? padrao.test(evidence) : false;
+}
+
 export function ehCorrecao(segmento: string): boolean {
   const palavras = segmento.trim().toLowerCase().replace(/[,.;:!?]/g, '').split(/\s+/);
   return palavras.slice(0, 4).some((p) => GATILHOS_CORRECAO.includes(p));
@@ -60,6 +75,10 @@ function aplicarUpdates(updates: UpdateExtraido[], modo: ModoExtracao): number {
   for (const u of updates) {
     if (!CHAVES_ESCALARES.includes(u.field)) {
       registrarEvento('update_descartado', { motivo: 'campo_invalido', field: u.field });
+      continue;
+    }
+    if (evidenciaSuspeita(u.field, u.evidence)) {
+      registrarEvento('update_descartado', { motivo: 'padrao_suspeito', field: u.field, evidence: u.evidence });
       continue;
     }
     if (typeof u.confidence === 'number' && u.confidence < LIMIAR_CONFIANCA) {
