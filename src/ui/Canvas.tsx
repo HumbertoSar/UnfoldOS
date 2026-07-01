@@ -21,6 +21,7 @@ import { ZoomControls } from '@ds/components/ZoomControls';
 import { InfiniteCanvas } from '@ds/canvas/InfiniteCanvas';
 import { UnfoldCard } from '@ds/canvas/UnfoldCard';
 import { useCanvasViewport } from '@ds/canvas/useCanvasViewport';
+import { BaloesInteresse } from './BaloesInteresse';
 
 const ICONE_SECAO: Record<SecaoChave, IconName> = {
   pessoa: 'user',
@@ -73,6 +74,8 @@ function CartaoSecao({ secao }: { secao: SecaoChave }) {
   const investimentos = useCanvas((s) => s.investimentos);
   const observacoesTodas = useCanvas((s) => s.observacoes);
   const observacoes = observacoesTodas.filter((o) => o.categoria === secao);
+  // Em "pessoa", paixões (tipoInteresse) viram balão — não duplicam como chip.
+  const observacoesExibidas = secao === 'pessoa' ? observacoes.filter((o) => !o.tipoInteresse) : observacoes;
   const destaque = useCanvas((s) => s.campoEmDestaque);
   const campos = camposDaSecao(secao);
 
@@ -147,10 +150,11 @@ function CartaoSecao({ secao }: { secao: SecaoChave }) {
         </div>
       )}
 
-      {/* Balde (observações da seção) */}
-      {observacoes.length > 0 && (
+      {/* Balde (observações da seção) — em "pessoa", paixões (tipoInteresse) já
+          aparecem como balão logo abaixo do card, então não repetimos aqui. */}
+      {observacoesExibidas.length > 0 && (
         <div className="card-block chips">
-          {observacoes.map((o) => (
+          {observacoesExibidas.map((o) => (
             <Badge key={o.id} tone="neutral">
               {o.chave}{o.valor ? `: ${o.valor}` : ''}
             </Badge>
@@ -245,6 +249,14 @@ const NOS_INICIAIS: NoPos[] = [
 function conteudoNo(id: string) {
   if (id === 'patrimonio') return <ResumoFinanceiro />;
   if (id === 'transcricao') return <PainelTranscricao />;
+  if (id === 'pessoa') {
+    return (
+      <>
+        <CartaoSecao secao="pessoa" />
+        <BaloesInteresse />
+      </>
+    );
+  }
   return <CartaoSecao secao={id as SecaoChave} />;
 }
 
