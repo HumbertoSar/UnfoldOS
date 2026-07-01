@@ -2,9 +2,6 @@
   position: absolute;
   transform-origin: center top;
   animation: uf-unfold-in var(--uf-duration-unfold) var(--uf-ease-spring) both;
-  /* Reposicionamento automático (evitar sobreposição) desliza suave; arraste
-     manual (abaixo) desliga a transição pra responder na hora ao ponteiro. */
-  transition: left 0.4s var(--uf-ease-spring), top 0.4s var(--uf-ease-spring);
 }
 
 .uf-unfold.is-draggable {
@@ -12,7 +9,6 @@
 }
 .uf-unfold.is-dragging {
   cursor: grabbing;
-  transition: none;
 }
 
 /* Enquanto arrasta, o card "levanta" da canvas */

@@ -236,18 +236,30 @@ function ResumoFinanceiro() {
   );
 }
 
+// Só a fala mais recente — uma linha, sempre a mesma altura. Nada de lista:
+// zero chance de uma linha sobrepor a outra, e o corte é o mesmo de sempre.
 function PainelTranscricao() {
   const interim = useFala((s) => s.interim);
   const linhas = useFala((s) => s.linhas);
-  const ultimas = linhas.slice(-6);
+  const ultima = linhas[linhas.length - 1];
+
+  let texto: string;
+  let classe = '';
+  if (interim) {
+    texto = `${interim}…`;
+    classe = 'is-interim';
+  } else if (ultima) {
+    texto = ultima;
+  } else {
+    texto = 'Aguardando a conversa…';
+    classe = 'is-empty';
+  }
 
   return (
     <Card elevation={1} padding="md">
       <CardEyebrow icon={<Icon name="waveform" size={14} />}>Transcrição</CardEyebrow>
       <div className="transcript__lines" style={{ marginTop: 'var(--uf-space-xs)' }}>
-        {ultimas.map((l, i) => <p key={i}>{l}</p>)}
-        {interim && <p className="is-interim">{interim}…</p>}
-        {ultimas.length === 0 && !interim && <p className="is-empty">Aguardando a conversa…</p>}
+        <p className={classe}>{texto}</p>
       </div>
     </Card>
   );
@@ -286,35 +298,6 @@ const NOS_INICIAIS: NoPos[] = [
   { id: 'financas', x: 799, y: 200, w: 340, delay: 750, tone: 'positive' },
   { id: 'patrimonio', x: 819, y: 550, w: 300, delay: 1000, tone: 'positive' },
 ];
-
-// Distância mínima entre cards e altura usada pra quem ainda não foi medido
-// (primeiro render, antes do ResizeObserver reportar).
-const GAP_MINIMO = 24;
-const ALTURA_PADRAO = 180;
-
-// Afasta cards que ficaram mais perto que o mínimo (um cresceu, ou um novo
-// entrou por cima de outro) — de cima pra baixo, empurrando só pra baixo.
-// Não decide QUANDO rodar (isso é do efeito em Canvas()) — só calcula o
-// resultado dado o estado atual.
-function afastarSobreposicoes(nos: NoPos[], alturas: Record<string, number>): Map<string, number> {
-  const alturaDe = (id: string) => alturas[id] ?? ALTURA_PADRAO;
-  const ordenados = [...nos].sort((a, b) => a.y - b.y || a.x - b.x);
-  const colocados: NoPos[] = [];
-  const resultado = new Map<string, number>();
-
-  for (const n of ordenados) {
-    let y = n.y;
-    for (const outro of colocados) {
-      const sobrepoeX = n.x < outro.x + outro.w + GAP_MINIMO && n.x + n.w + GAP_MINIMO > outro.x;
-      if (!sobrepoeX) continue;
-      const limite = outro.y + alturaDe(outro.id) + GAP_MINIMO;
-      if (y < limite) y = limite;
-    }
-    colocados.push({ ...n, y });
-    resultado.set(n.id, y);
-  }
-  return resultado;
-}
 
 function conteudoNo(id: string) {
   if (id === 'patrimonio') return <ResumoFinanceiro />;
@@ -361,26 +344,6 @@ export function Canvas() {
   const estado = useCanvas((s) => ({ dados: s.dados, investimentos: s.investimentos, observacoes: s.observacoes }));
   const nosVisiveis = nos.filter((n) => noVisivel(n.id, capturaIniciada, estado));
 
-  // Alturas reais (medidas ao vivo por cada UnfoldCard) e se algum está sendo
-  // arrastado agora. `nos` continua sendo só a posição-base (só muda por
-  // arraste manual, via `mover`); a posição final exibida é sempre CALCULADA
-  // do zero a partir dela + alturas — nunca escrita de volta em `nos`. Assim
-  // o reflow não tem histórico pra acumular: mesma entrada, mesma saída,
-  // sempre — antes, cada card novo empurrava a partir de onde o anterior
-  // JÁ tinha empurrado (às vezes com uma altura ainda não medida direito),
-  // e isso ia se somando até um card ir parar bem longe.
-  const [alturas, setAlturas] = useState<Record<string, number>>({});
-  const [arrastandoId, setArrastandoId] = useState<string | null>(null);
-  const registrarAltura = (id: string, altura: number) =>
-    setAlturas((atual) => (atual[id] === altura ? atual : { ...atual, [id]: altura }));
-
-  // Enquanto um card está sendo arrastado, usa as posições cruas (responde
-  // 1:1 ao ponteiro, sem o reflow competindo); ao soltar, a próxima renderização
-  // já recalcula tudo do zero, de uma vez só.
-  const posicoesFinais = arrastandoId
-    ? new Map(nosVisiveis.map((n) => [n.id, n.y]))
-    : afastarSobreposicoes(nosVisiveis, alturas);
-
   // Mede o palco para projetar o retângulo do viewport no minimapa e, na
   // primeira medição, centraliza a viewport no hub ("pessoa") — funciona pra
   // qualquer tamanho de tela, ao contrário de um pan fixo.
@@ -419,7 +382,7 @@ export function Canvas() {
   };
   const miniNodes: MinimapNode[] = nosVisiveis.map((n) => ({
     x: n.x / WORLD.w,
-    y: (posicoesFinais.get(n.id) ?? n.y) / WORLD.h,
+    y: n.y / WORLD.h,
     w: n.w / WORLD.w,
     h: 0.14,
     tone: n.tone,
@@ -469,14 +432,12 @@ export function Canvas() {
             <UnfoldCard
               key={n.id}
               x={n.x}
-              y={posicoesFinais.get(n.id) ?? n.y}
+              y={n.y}
               width={n.w}
               scale={vp.viewport.scale}
               draggable
               onMove={(x, y) => mover(n.id, x, y)}
               unfoldDelay={n.delay}
-              onAltura={(altura) => registrarAltura(n.id, altura)}
-              onArrastando={(arrastando) => setArrastandoId(arrastando ? n.id : null)}
             >
               {conteudoNo(n.id)}
             </UnfoldCard>

@@ -368,22 +368,15 @@
 }
 
 /* --- Transcrição -------------------------------------------------------- */
-/* Altura fixa (não cresce com a conversa) — só as últimas falas, ancoradas
-   embaixo, pra dar o feedback de "tá ouvindo agora" sem virar um log infinito. */
+/* Só a fala mais recente, uma linha — nunca cresce, nunca sobrepõe: é um
+   parágrafo só, sempre. */
 .transcript__lines {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: var(--uf-space-3xs);
-  height: 64px;
-  overflow: hidden;
   font-size: var(--uf-text-label);
   color: var(--uf-color-ink-secondary);
-  min-width: 0; /* item flex da coluna acima — sem isso ele resiste a encolher */
 }
 
 .transcript__lines p {
-  min-width: 0;
+  margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
