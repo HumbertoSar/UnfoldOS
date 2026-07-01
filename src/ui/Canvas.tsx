@@ -362,31 +362,24 @@ export function Canvas() {
   const nosVisiveis = nos.filter((n) => noVisivel(n.id, capturaIniciada, estado));
 
   // Alturas reais (medidas ao vivo por cada UnfoldCard) e se algum está sendo
-  // arrastado agora — o reflow abaixo nunca mexe em card sob arraste manual.
+  // arrastado agora. `nos` continua sendo só a posição-base (só muda por
+  // arraste manual, via `mover`); a posição final exibida é sempre CALCULADA
+  // do zero a partir dela + alturas — nunca escrita de volta em `nos`. Assim
+  // o reflow não tem histórico pra acumular: mesma entrada, mesma saída,
+  // sempre — antes, cada card novo empurrava a partir de onde o anterior
+  // JÁ tinha empurrado (às vezes com uma altura ainda não medida direito),
+  // e isso ia se somando até um card ir parar bem longe.
   const [alturas, setAlturas] = useState<Record<string, number>>({});
   const [arrastandoId, setArrastandoId] = useState<string | null>(null);
   const registrarAltura = (id: string, altura: number) =>
     setAlturas((atual) => (atual[id] === altura ? atual : { ...atual, [id]: altura }));
 
-  // Reajusta posições só quando um card novo aparece, cresce, ou um arraste
-  // termina — nunca continuamente, pra não brigar com um posicionamento manual.
-  const idsVisiveis = nosVisiveis.map((n) => n.id).join(',');
-  const alturasChave = JSON.stringify(alturas);
-  useEffect(() => {
-    if (arrastandoId) return;
-    const alvo = afastarSobreposicoes(nosVisiveis, alturas);
-    setNos((atual) => {
-      let mudou = false;
-      const proximo = atual.map((n) => {
-        const novoY = alvo.get(n.id);
-        if (novoY === undefined || Math.abs(novoY - n.y) < 1) return n;
-        mudou = true;
-        return { ...n, y: novoY };
-      });
-      return mudou ? proximo : atual;
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [idsVisiveis, alturasChave, arrastandoId]);
+  // Enquanto um card está sendo arrastado, usa as posições cruas (responde
+  // 1:1 ao ponteiro, sem o reflow competindo); ao soltar, a próxima renderização
+  // já recalcula tudo do zero, de uma vez só.
+  const posicoesFinais = arrastandoId
+    ? new Map(nosVisiveis.map((n) => [n.id, n.y]))
+    : afastarSobreposicoes(nosVisiveis, alturas);
 
   // Mede o palco para projetar o retângulo do viewport no minimapa e, na
   // primeira medição, centraliza a viewport no hub ("pessoa") — funciona pra
@@ -426,7 +419,7 @@ export function Canvas() {
   };
   const miniNodes: MinimapNode[] = nosVisiveis.map((n) => ({
     x: n.x / WORLD.w,
-    y: n.y / WORLD.h,
+    y: (posicoesFinais.get(n.id) ?? n.y) / WORLD.h,
     w: n.w / WORLD.w,
     h: 0.14,
     tone: n.tone,
@@ -476,7 +469,7 @@ export function Canvas() {
             <UnfoldCard
               key={n.id}
               x={n.x}
-              y={n.y}
+              y={posicoesFinais.get(n.id) ?? n.y}
               width={n.w}
               scale={vp.viewport.scale}
               draggable

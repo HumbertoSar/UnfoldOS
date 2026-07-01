@@ -134,6 +134,7 @@
    aqui só garantimos que ele ocupe a largura da pilha. */
 .canvas-ov-transcricao {
   width: 100%;
+  min-width: 0; /* item da pilha flex acima — sem isso ele resiste a encolher */
 }
 
 .canvas-ov-minimap {
@@ -378,9 +379,11 @@
   overflow: hidden;
   font-size: var(--uf-text-label);
   color: var(--uf-color-ink-secondary);
+  min-width: 0; /* item flex da coluna acima — sem isso ele resiste a encolher */
 }
 
 .transcript__lines p {
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
