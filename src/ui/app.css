@@ -367,12 +367,23 @@
 }
 
 /* --- Transcrição -------------------------------------------------------- */
+/* Altura fixa (não cresce com a conversa) — só as últimas falas, ancoradas
+   embaixo, pra dar o feedback de "tá ouvindo agora" sem virar um log infinito. */
 .transcript__lines {
   display: flex;
   flex-direction: column;
+  justify-content: flex-end;
   gap: var(--uf-space-3xs);
+  height: 64px;
+  overflow: hidden;
   font-size: var(--uf-text-label);
   color: var(--uf-color-ink-secondary);
+}
+
+.transcript__lines p {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .transcript__lines .is-interim {
