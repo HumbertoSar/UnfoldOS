@@ -8,8 +8,7 @@ export interface Balao {
   emoji: string;
   texto: string;
   detalhe?: string; // ex.: nome do time de futebol
-  bg?: string; // cor de fundo (times têm cor própria)
-  fg?: string;
+  bandeira?: { corA: string; corB: string }; // só futebol — cores do time
 }
 
 interface EstadoBaloes {

@@ -31,16 +31,18 @@ export function infoInteresse(tipo: string): { emoji: string; texto: string } {
 
 export interface CoresTime {
   nome: string;
-  bg: string;
-  fg: string;
+  corA: string; // faixa de cima da bandeirinha
+  corB: string; // faixa de baixo
 }
 
 // Times cariocas principais — pra este teste, só os quatro grandes do Rio.
+// As cores viram uma bandeirinha de duas faixas (ver BaloesInteresse.tsx),
+// não mais o balão inteiro colorido.
 const TIMES_CARIOCAS: Record<string, CoresTime> = {
-  flamengo: { nome: 'Flamengo', bg: '#E30613', fg: '#FFFFFF' },
-  vasco: { nome: 'Vasco da Gama', bg: '#0D0D0D', fg: '#FFFFFF' },
-  fluminense: { nome: 'Fluminense', bg: '#9F2042', fg: '#FFFFFF' },
-  botafogo: { nome: 'Botafogo', bg: '#1A1A1A', fg: '#FFFFFF' },
+  flamengo: { nome: 'Flamengo', corA: '#E30613', corB: '#000000' },
+  vasco: { nome: 'Vasco da Gama', corA: '#FFFFFF', corB: '#000000' },
+  fluminense: { nome: 'Fluminense', corA: '#9F2042', corB: '#006437' },
+  botafogo: { nome: 'Botafogo', corA: '#000000', corB: '#FFFFFF' },
 };
 
 const ALIAS_TIME: Record<string, keyof typeof TIMES_CARIOCAS> = {

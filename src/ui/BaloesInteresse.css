@@ -9,6 +9,7 @@
 .balao-interesse {
   position: relative;
   display: inline-flex;
+  animation: uf-balao-aparecer var(--uf-duration-unfold) var(--uf-ease-standard) both;
 }
 
 .balao-interesse__corpo {
@@ -22,13 +23,45 @@
   box-shadow: var(--uf-elevation-2);
   font-size: var(--uf-text-label);
   white-space: nowrap;
-  animation: uf-balao-aparecer var(--uf-duration-unfold) var(--uf-ease-standard) both,
-    uf-balao-flutuar 3.4s ease-in-out 0.4s infinite;
+  /* Duração/atraso vêm por instância (ver BaloesInteresse.tsx) — cada balão
+     boia no seu próprio compasso, não como um bloco só. */
+  animation: uf-balao-flutuar var(--duracao-flutuar, 3.6s) ease-in-out var(--atraso-flutuar, 0s) infinite;
 }
 
 .balao-interesse__emoji {
   font-size: 18px;
   line-height: 1;
+}
+
+/* Bandeirinha: pano de duas cores (as do time) numa haste curta. */
+.balao-interesse__bandeira {
+  position: relative;
+  display: inline-block;
+  width: 16px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+.balao-interesse__bandeira::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -1px;
+  width: 2px;
+  height: 14px;
+  background: var(--uf-color-ink-tertiary);
+  border-radius: 1px;
+}
+
+.balao-interesse__bandeira::after {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0;
+  width: 14px;
+  height: 10px;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  background: linear-gradient(to bottom, var(--cor-a) 50%, var(--cor-b) 50%);
 }
 
 /* Fagulhas: pequenos tracinhos que estouram em volta do balão só na entrada —
@@ -83,7 +116,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .balao-interesse__corpo {
-    animation: uf-balao-aparecer var(--uf-duration-base) var(--uf-ease-standard) both;
+    animation: none;
   }
   .balao-interesse__fagulha {
     display: none;

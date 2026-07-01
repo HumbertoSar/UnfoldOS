@@ -125,7 +125,7 @@ function aplicarObservacoes(itens: ObservacaoExtraida[]): number {
     registrarEvento('observacao_adicionada', { categoria: o.categoria, chave: o.chave, tipoInteresse: o.tipoInteresse });
 
     // Paixão detectada (futebol, viagem, filme/série, livro, arte, pet, natureza)
-    // → balão flutuante e divertido, longe dos cards.
+    // → balão que nasce do card "Quem é Você?".
     if (o.tipoInteresse) {
       const { emoji, texto } = infoInteresse(o.tipoInteresse);
       const time = o.tipoInteresse === 'futebol' ? detectarTimeCarioca(o.valor ?? '') : null;
@@ -133,8 +133,7 @@ function aplicarObservacoes(itens: ObservacaoExtraida[]): number {
         emoji,
         texto,
         detalhe: time?.nome ?? (o.valor || undefined),
-        bg: time?.bg,
-        fg: time?.fg,
+        bandeira: time ? { corA: time.corA, corB: time.corB } : undefined,
       });
     }
     aplicados++;
