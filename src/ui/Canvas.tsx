@@ -11,7 +11,7 @@ import type { EstadoCanvas } from '../domain/agregacao';
 import { moeda } from './format';
 import { Card, CardEyebrow, CardTitle } from '@ds/components/Card';
 import { Button } from '@ds/components/Button';
-import { Badge } from '@ds/components/Badge';
+import { Badge, ConfidenceDots } from '@ds/components/Badge';
 import { Icon } from '@ds/components/Icon';
 import type { IconName } from '@ds/components/Icon';
 import { ConfidenceMeter } from '@ds/components/ConfidenceMeter';
@@ -83,11 +83,28 @@ function CartaoSecao({ secao }: { secao: SecaoChave }) {
   // "Em formação" = a seção ainda não tem nada captado.
   const algumPreenchido = secaoTemAlgumDado(secao, { dados, investimentos, observacoes: observacoesTodas });
 
+  // Completude só faz sentido pra seções com campos tipados (pessoa, finanças,
+  // suitability) — dependentes/sonhos são balde aberto, sem um "total" fixo.
+  const completude = completudePorSecao({ dados, investimentos, observacoes: observacoesTodas }).find(
+    (c) => c.secao === secao,
+  );
+  const mostrarCompletude = campos.length > 0 && completude !== undefined;
+
   return (
     <Card as="section" elevation={1} padding="md" forming={!algumPreenchido}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--uf-space-xs)' }}>
-        <Icon name={ICONE_SECAO[secao]} size={18} />
-        <CardTitle>{meta.titulo}</CardTitle>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--uf-space-xs)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--uf-space-xs)' }}>
+          <Icon name={ICONE_SECAO[secao]} size={18} />
+          <CardTitle>{meta.titulo}</CardTitle>
+        </div>
+        {mostrarCompletude && (
+          <ConfidenceDots
+            level={completude.preenchidos}
+            total={completude.total}
+            label={`${completude.preenchidos} de ${completude.total} campos`}
+            size={6}
+          />
+        )}
       </div>
       <p className="muted" style={{ marginBottom: 'var(--uf-space-sm)' }}>{meta.descricao}</p>
 
