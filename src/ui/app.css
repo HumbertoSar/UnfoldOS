@@ -247,6 +247,15 @@
   gap: var(--uf-space-2xs);
 }
 
+/* Badge é pensado pra rótulo curto (nowrap); aqui mostra texto livre do
+   balde, que pode ser longo — precisa poder quebrar linha dentro do card
+   em vez de vazar pra fora. */
+.chips .uf-badge {
+  white-space: normal;
+  max-width: 100%;
+  word-break: break-word;
+}
+
 /* Texto-placeholder (vazio/desabilitado) — cor compartilhada por toda a UI:
    o "—" de investimentos, o valor de campo vazio e "Aguardando a conversa…". */
 .muted,
