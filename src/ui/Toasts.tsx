@@ -10,22 +10,25 @@ export function Toasts() {
   return (
     <div className="toasts no-print">
       {toasts.map((t) => {
+        const classeBase = `toast${t.saindo ? ' toast--saindo' : ''}`;
+        const estilo = { animationDelay: `${t.atrasoEntrada ?? 0}ms` };
+
         if (t.tipo === 'erro') {
           return (
-            <div key={t.id} className="toast toast--erro">
+            <div key={t.id} className={`${classeBase} toast--erro`} style={estilo}>
               {t.mensagem}
             </div>
           );
         }
         if (t.tipo === 'aviso') {
           return (
-            <div key={t.id} className="toast toast--aviso">
+            <div key={t.id} className={`${classeBase} toast--aviso`} style={estilo}>
               {t.mensagem}
             </div>
           );
         }
         return (
-          <div key={t.id} className="toast toast--captura">
+          <div key={t.id} className={`${classeBase} toast--captura`} style={estilo}>
             <span>
               {t.correcao ? '↻ ' : '✓ Captei: '}
               <strong>{t.rotulo}</strong>

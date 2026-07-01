@@ -1,15 +1,15 @@
-.baloes-interesse {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: var(--uf-z-toast);
+.baloes-da-pessoa {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--uf-space-xs);
+  margin-top: var(--uf-space-sm);
+  padding: 0 var(--uf-space-2xs);
 }
 
 .balao-interesse {
-  position: absolute;
-  translate: -50% -50%; /* centraliza no ponto — separado de `transform`, que a
-    animação de entrada usa, pra elas não brigarem entre si. */
-  animation: uf-balao-entrada var(--uf-duration-unfold) var(--uf-ease-spring) both;
+  position: relative;
+  display: inline-flex;
+  animation: uf-balao-aparecer var(--uf-duration-unfold) var(--uf-ease-standard) both;
 }
 
 .balao-interesse__corpo {
@@ -18,31 +18,74 @@
   gap: var(--uf-space-2xs);
   padding: var(--uf-space-2xs) var(--uf-space-sm);
   border-radius: var(--uf-radius-full);
-  background: var(--uf-color-surface);
+  background: var(--uf-color-surface-sunken);
   color: var(--uf-color-ink);
   box-shadow: var(--uf-elevation-2);
   font-size: var(--uf-text-label);
   white-space: nowrap;
-  animation: uf-balao-flutuar 3.4s ease-in-out 0.5s infinite;
+  /* Duração/atraso vêm por instância (ver BaloesInteresse.tsx) — cada balão
+     boia no seu próprio compasso, não como um bloco só. */
+  animation: uf-balao-flutuar var(--duracao-flutuar, 3.6s) ease-in-out var(--atraso-flutuar, 0s) infinite;
 }
 
 .balao-interesse__emoji {
-  font-size: 20px;
+  font-size: 18px;
   line-height: 1;
 }
 
-@keyframes uf-balao-entrada {
-  0% {
+/* Bandeirinha: pano de duas cores (as do time) numa haste curta. */
+.balao-interesse__bandeira {
+  position: relative;
+  display: inline-block;
+  width: 16px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+.balao-interesse__bandeira::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -1px;
+  width: 2px;
+  height: 14px;
+  background: var(--uf-color-ink-tertiary);
+  border-radius: 1px;
+}
+
+.balao-interesse__bandeira::after {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0;
+  width: 14px;
+  height: 10px;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  background: linear-gradient(to bottom, var(--cor-a) 50%, var(--cor-b) 50%);
+}
+
+/* Fagulhas: pequenos tracinhos que estouram em volta do balão só na entrada —
+   o "poof, apareceu!" que dá o clima descontraído. */
+.balao-interesse__fagulha {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 3px;
+  height: 9px;
+  border-radius: 2px;
+  background: var(--uf-color-primary);
+  opacity: 0;
+  pointer-events: none;
+  animation: uf-fagulha-estourar 0.6s var(--uf-ease-spring) both;
+  animation-delay: 0.05s;
+}
+
+@keyframes uf-balao-aparecer {
+  from {
     opacity: 0;
-    transform: scale(0.5);
   }
-  60% {
+  to {
     opacity: 1;
-    transform: scale(1.08);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
   }
 }
 
@@ -52,23 +95,30 @@
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-8px);
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes uf-fagulha-estourar {
+  0% {
+    opacity: 0;
+    transform: rotate(calc(var(--i) * 45deg)) translateY(-6px) scale(0);
+  }
+  45% {
+    opacity: 1;
+    transform: rotate(calc(var(--i) * 45deg)) translateY(-20px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(calc(var(--i) * 45deg)) translateY(-28px) scale(0.6);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .balao-interesse {
-    animation: uf-balao-fade var(--uf-duration-base) var(--uf-ease-standard) both;
-  }
   .balao-interesse__corpo {
     animation: none;
   }
-  @keyframes uf-balao-fade {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+  .balao-interesse__fagulha {
+    display: none;
   }
 }

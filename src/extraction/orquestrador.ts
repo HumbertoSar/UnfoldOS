@@ -24,6 +24,21 @@ const GATILHOS_CORRECAO = ['altere', 'altera', 'corrige', 'corrigir', 'corrija',
 const LIMIAR_CONFIANCA = 0.7;
 const DEBOUNCE_MS = 2500;
 
+// Confusões conhecidas do modelo de extração, vistas repetidas vezes em sessões
+// reais mesmo com o prompt reforçado (ver server/index.ts, regras 7c/7d): ele
+// insiste em calcular horizonteAnos a partir de "aposentar" e, às vezes, também
+// ecoa o valor da previdência no campo imoveis. Rede de segurança determinística
+// — não depende do modelo obedecer o prompt.
+const PADROES_SUSPEITOS: Partial<Record<string, RegExp>> = {
+  horizonteAnos: /aposent/i,
+  imoveis: /previd[eê]ncia/i,
+};
+
+function evidenciaSuspeita(field: string, evidence: string): boolean {
+  const padrao = PADROES_SUSPEITOS[field];
+  return padrao ? padrao.test(evidence) : false;
+}
+
 export function ehCorrecao(segmento: string): boolean {
   const palavras = segmento.trim().toLowerCase().replace(/[,.;:!?]/g, '').split(/\s+/);
   return palavras.slice(0, 4).some((p) => GATILHOS_CORRECAO.includes(p));
@@ -60,6 +75,10 @@ function aplicarUpdates(updates: UpdateExtraido[], modo: ModoExtracao): number {
   for (const u of updates) {
     if (!CHAVES_ESCALARES.includes(u.field)) {
       registrarEvento('update_descartado', { motivo: 'campo_invalido', field: u.field });
+      continue;
+    }
+    if (evidenciaSuspeita(u.field, u.evidence)) {
+      registrarEvento('update_descartado', { motivo: 'padrao_suspeito', field: u.field, evidence: u.evidence });
       continue;
     }
     if (typeof u.confidence === 'number' && u.confidence < LIMIAR_CONFIANCA) {
@@ -125,16 +144,19 @@ function aplicarObservacoes(itens: ObservacaoExtraida[]): number {
     registrarEvento('observacao_adicionada', { categoria: o.categoria, chave: o.chave, tipoInteresse: o.tipoInteresse });
 
     // Paixão detectada (futebol, viagem, filme/série, livro, arte, pet, natureza)
-    // → balão flutuante e divertido, longe dos cards.
-    if (o.tipoInteresse) {
+    // → balão que nasce do card "Quem é Você?". Futebol sem time ainda (a fala
+    // foi cortada antes do nome do clube) não vira balão — evita um balão
+    // "Torcedor(a)" vazio seguido de outro completo quando o resto da frase
+    // chega no próximo trecho.
+    const futebolSemTime = o.tipoInteresse === 'futebol' && !o.valor;
+    if (o.tipoInteresse && !futebolSemTime) {
       const { emoji, texto } = infoInteresse(o.tipoInteresse);
       const time = o.tipoInteresse === 'futebol' ? detectarTimeCarioca(o.valor ?? '') : null;
       adicionarBalao({
         emoji,
         texto,
         detalhe: time?.nome ?? (o.valor || undefined),
-        bg: time?.bg,
-        fg: time?.fg,
+        bandeira: time ? { corA: time.corA, corB: time.corB } : undefined,
       });
     }
     aplicados++;

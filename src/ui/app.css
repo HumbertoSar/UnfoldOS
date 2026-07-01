@@ -111,17 +111,29 @@
 }
 
 /* Overlays fixos na viewport (não sofrem pan/zoom) */
-.canvas-ov-meter {
+.canvas-ov-meter-stack {
   position: absolute;
   left: var(--uf-space-lg);
   top: var(--uf-space-lg);
   width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--uf-space-sm);
+}
+
+.canvas-ov-meter {
   padding: var(--uf-space-md);
   background: color-mix(in srgb, var(--uf-color-surface) 86%, transparent);
   backdrop-filter: blur(8px);
   border: 1px solid var(--uf-color-border);
   border-radius: var(--uf-radius-lg);
   box-shadow: var(--uf-elevation-2);
+}
+
+/* O painel de transcrição já traz seu próprio Card (fundo/borda/sombra) —
+   aqui só garantimos que ele ocupe a largura da pilha. */
+.canvas-ov-transcricao {
+  width: 100%;
 }
 
 .canvas-ov-minimap {
@@ -235,6 +247,15 @@
   gap: var(--uf-space-2xs);
 }
 
+/* Badge é pensado pra rótulo curto (nowrap); aqui mostra texto livre do
+   balde, que pode ser longo — precisa poder quebrar linha dentro do card
+   em vez de vazar pra fora. */
+.chips .uf-badge {
+  white-space: normal;
+  max-width: 100%;
+  word-break: break-word;
+}
+
 /* Texto-placeholder (vazio/desabilitado) — cor compartilhada por toda a UI:
    o "—" de investimentos, o valor de campo vazio e "Aguardando a conversa…". */
 .muted,
@@ -320,7 +341,15 @@
   font-size: var(--uf-text-label);
   color: var(--uf-color-ink-on-dark);
   box-shadow: var(--uf-elevation-3);
-  animation: uf-toast-in 0.2s ease;
+  /* `both` segura o estado inicial durante o atraso (por instância, ver
+     Toasts.tsx) — sem isso o toast "pisca" cheio antes de deslizar. */
+  animation: uf-toast-in 0.25s ease both;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.toast--saindo {
+  opacity: 0;
+  transform: translateX(20px) scale(0.96);
 }
 
 .toast--captura {
@@ -377,5 +406,6 @@
 @media (prefers-reduced-motion: reduce) {
   .toast {
     animation: none;
+    transition: none;
   }
 }

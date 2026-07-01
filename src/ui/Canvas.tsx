@@ -4,6 +4,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useFala } from '../speech/falaStore';
 import { useCanvas } from '../store/useCanvas';
+import { useBaloes } from '../store/useBaloes';
 import { useOrquestrador } from '../extraction/orquestrador';
 import { SECOES, camposDaSecao, type SecaoChave } from '../domain/registro';
 import { patrimonioLiquido, completudePorSecao, secaoTemAlgumDado } from '../domain/agregacao';
@@ -21,6 +22,7 @@ import { ZoomControls } from '@ds/components/ZoomControls';
 import { InfiniteCanvas } from '@ds/canvas/InfiniteCanvas';
 import { UnfoldCard } from '@ds/canvas/UnfoldCard';
 import { useCanvasViewport } from '@ds/canvas/useCanvasViewport';
+import { BaloesInteresse } from './BaloesInteresse';
 
 const ICONE_SECAO: Record<SecaoChave, IconName> = {
   pessoa: 'user',
@@ -37,6 +39,7 @@ function BarraStatus() {
   const parar = useFala((s) => s.parar);
   const limparFala = useFala((s) => s.limpar);
   const limparTudo = useCanvas((s) => s.limparTudo);
+  const limparBaloes = useBaloes((s) => s.limpar);
 
   return (
     <div className="statusbar no-print">
@@ -57,6 +60,7 @@ function BarraStatus() {
             if (confirm('Limpar todos os dados e a transcrição?')) {
               limparTudo();
               limparFala();
+              limparBaloes();
             }
           }}
         >
@@ -73,6 +77,8 @@ function CartaoSecao({ secao }: { secao: SecaoChave }) {
   const investimentos = useCanvas((s) => s.investimentos);
   const observacoesTodas = useCanvas((s) => s.observacoes);
   const observacoes = observacoesTodas.filter((o) => o.categoria === secao);
+  // Em "pessoa", paixões (tipoInteresse) viram balão — não duplicam como chip.
+  const observacoesExibidas = secao === 'pessoa' ? observacoes.filter((o) => !o.tipoInteresse) : observacoes;
   const destaque = useCanvas((s) => s.campoEmDestaque);
   const campos = camposDaSecao(secao);
 
@@ -147,10 +153,11 @@ function CartaoSecao({ secao }: { secao: SecaoChave }) {
         </div>
       )}
 
-      {/* Balde (observações da seção) */}
-      {observacoes.length > 0 && (
+      {/* Balde (observações da seção) — em "pessoa", paixões (tipoInteresse) já
+          aparecem como balão logo abaixo do card, então não repetimos aqui. */}
+      {observacoesExibidas.length > 0 && (
         <div className="card-block chips">
-          {observacoes.map((o) => (
+          {observacoesExibidas.map((o) => (
             <Badge key={o.id} tone="neutral">
               {o.chave}{o.valor ? `: ${o.valor}` : ''}
             </Badge>
@@ -227,33 +234,40 @@ interface NoPos {
   tone: MinimapNode['tone'];
 }
 
-// "pessoa" é o centro de tudo: fica no meio da canvas, e os outros 6 cards se
-// desdobram ao redor dele (layout radial). "pessoa" e "transcricao" entram
-// juntos ao apertar Começar; os demais entram cada um no seu momento — quando a
-// seção captar o primeiro dado — com um leve atraso crescente entre eles pra
-// dar a sensação de cascata se abrindo a partir do centro.
+// "pessoa" é o centro de tudo: fica no meio da canvas, e os outros 5 cards se
+// desdobram ao redor dele (layout radial — "transcricao" virou overlay fixo,
+// ver Canvas()). "pessoa" entra ao apertar Começar; os demais entram cada um
+// no seu momento — quando a seção captar o primeiro dado. Os atrasos são bem
+// espaçados (250ms+) de propósito: quando a IA capta várias seções de uma vez
+// só (uma frase longa), os cards precisam continuar entrando um de cada vez.
 const NOS_INICIAIS: NoPos[] = [
   { id: 'pessoa', x: 490, y: 395, w: 300, delay: 0, tone: 'primary' },
-  { id: 'sonhos', x: 490, y: 110, w: 300, delay: 60, tone: 'primary' },
-  { id: 'financas', x: 799, y: 200, w: 340, delay: 120, tone: 'positive' },
-  { id: 'patrimonio', x: 819, y: 550, w: 300, delay: 240, tone: 'positive' },
-  { id: 'transcricao', x: 470, y: 700, w: 340, delay: 120, tone: 'neutral' },
-  { id: 'suitability', x: 161, y: 530, w: 300, delay: 180, tone: 'attention' },
   { id: 'dependentes', x: 161, y: 260, w: 300, delay: 0, tone: 'neutral' },
+  { id: 'sonhos', x: 490, y: 110, w: 300, delay: 250, tone: 'primary' },
+  { id: 'suitability', x: 161, y: 530, w: 300, delay: 500, tone: 'attention' },
+  { id: 'financas', x: 799, y: 200, w: 340, delay: 750, tone: 'positive' },
+  { id: 'patrimonio', x: 819, y: 550, w: 300, delay: 1000, tone: 'positive' },
 ];
 
 function conteudoNo(id: string) {
   if (id === 'patrimonio') return <ResumoFinanceiro />;
-  if (id === 'transcricao') return <PainelTranscricao />;
+  if (id === 'pessoa') {
+    return (
+      <>
+        <CartaoSecao secao="pessoa" />
+        <BaloesInteresse />
+      </>
+    );
+  }
   return <CartaoSecao secao={id as SecaoChave} />;
 }
 
-// Revelação progressiva: "pessoa" e "transcricao" entram ao apertar Começar;
-// os demais só quando a seção correspondente captar o primeiro dado.
-// "patrimonio" segue "financas", já que resume os mesmos campos.
+// Revelação progressiva: "pessoa" entra ao apertar Começar; os demais só
+// quando a seção correspondente captar o primeiro dado. "patrimonio" segue
+// "financas", já que resume os mesmos campos.
 function noVisivel(id: string, capturaIniciada: boolean, estado: EstadoCanvas): boolean {
   if (!capturaIniciada) return false;
-  if (id === 'pessoa' || id === 'transcricao') return true;
+  if (id === 'pessoa') return true;
   const secao = id === 'patrimonio' ? 'financas' : (id as SecaoChave);
   return secaoTemAlgumDado(secao, estado);
 }
@@ -326,8 +340,13 @@ export function Canvas() {
 
   const overlay = (
     <>
-      <div className="canvas-ov-meter">
-        <ConfidenceMeter value={pct} label="Coleta da conversa" caption={`${pct}% mapeado`} />
+      <div className="canvas-ov-meter-stack">
+        <div className="canvas-ov-meter">
+          <ConfidenceMeter value={pct} label="Coleta da conversa" caption={`${pct}% mapeado`} />
+        </div>
+        <div className="canvas-ov-transcricao">
+          <PainelTranscricao />
+        </div>
       </div>
       <div className="canvas-ov-minimap">
         <Minimap nodes={miniNodes} viewport={view} />
