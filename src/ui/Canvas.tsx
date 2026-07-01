@@ -287,6 +287,35 @@ const NOS_INICIAIS: NoPos[] = [
   { id: 'patrimonio', x: 819, y: 550, w: 300, delay: 1000, tone: 'positive' },
 ];
 
+// Distância mínima entre cards e altura usada pra quem ainda não foi medido
+// (primeiro render, antes do ResizeObserver reportar).
+const GAP_MINIMO = 24;
+const ALTURA_PADRAO = 180;
+
+// Afasta cards que ficaram mais perto que o mínimo (um cresceu, ou um novo
+// entrou por cima de outro) — de cima pra baixo, empurrando só pra baixo.
+// Não decide QUANDO rodar (isso é do efeito em Canvas()) — só calcula o
+// resultado dado o estado atual.
+function afastarSobreposicoes(nos: NoPos[], alturas: Record<string, number>): Map<string, number> {
+  const alturaDe = (id: string) => alturas[id] ?? ALTURA_PADRAO;
+  const ordenados = [...nos].sort((a, b) => a.y - b.y || a.x - b.x);
+  const colocados: NoPos[] = [];
+  const resultado = new Map<string, number>();
+
+  for (const n of ordenados) {
+    let y = n.y;
+    for (const outro of colocados) {
+      const sobrepoeX = n.x < outro.x + outro.w + GAP_MINIMO && n.x + n.w + GAP_MINIMO > outro.x;
+      if (!sobrepoeX) continue;
+      const limite = outro.y + alturaDe(outro.id) + GAP_MINIMO;
+      if (y < limite) y = limite;
+    }
+    colocados.push({ ...n, y });
+    resultado.set(n.id, y);
+  }
+  return resultado;
+}
+
 function conteudoNo(id: string) {
   if (id === 'patrimonio') return <ResumoFinanceiro />;
   if (id === 'pessoa') {
@@ -331,6 +360,33 @@ export function Canvas() {
   const iniciarFala = useFala((s) => s.iniciar);
   const estado = useCanvas((s) => ({ dados: s.dados, investimentos: s.investimentos, observacoes: s.observacoes }));
   const nosVisiveis = nos.filter((n) => noVisivel(n.id, capturaIniciada, estado));
+
+  // Alturas reais (medidas ao vivo por cada UnfoldCard) e se algum está sendo
+  // arrastado agora — o reflow abaixo nunca mexe em card sob arraste manual.
+  const [alturas, setAlturas] = useState<Record<string, number>>({});
+  const [arrastandoId, setArrastandoId] = useState<string | null>(null);
+  const registrarAltura = (id: string, altura: number) =>
+    setAlturas((atual) => (atual[id] === altura ? atual : { ...atual, [id]: altura }));
+
+  // Reajusta posições só quando um card novo aparece, cresce, ou um arraste
+  // termina — nunca continuamente, pra não brigar com um posicionamento manual.
+  const idsVisiveis = nosVisiveis.map((n) => n.id).join(',');
+  const alturasChave = JSON.stringify(alturas);
+  useEffect(() => {
+    if (arrastandoId) return;
+    const alvo = afastarSobreposicoes(nosVisiveis, alturas);
+    setNos((atual) => {
+      let mudou = false;
+      const proximo = atual.map((n) => {
+        const novoY = alvo.get(n.id);
+        if (novoY === undefined || Math.abs(novoY - n.y) < 1) return n;
+        mudou = true;
+        return { ...n, y: novoY };
+      });
+      return mudou ? proximo : atual;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idsVisiveis, alturasChave, arrastandoId]);
 
   // Mede o palco para projetar o retângulo do viewport no minimapa e, na
   // primeira medição, centraliza a viewport no hub ("pessoa") — funciona pra
@@ -426,6 +482,8 @@ export function Canvas() {
               draggable
               onMove={(x, y) => mover(n.id, x, y)}
               unfoldDelay={n.delay}
+              onAltura={(altura) => registrarAltura(n.id, altura)}
+              onArrastando={(arrastando) => setArrastandoId(arrastando ? n.id : null)}
             >
               {conteudoNo(n.id)}
             </UnfoldCard>
