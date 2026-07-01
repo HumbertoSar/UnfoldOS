@@ -7,7 +7,8 @@ import { useCanvas } from '../store/useCanvas';
 import { useToasts } from '../store/useToasts';
 import { useBaloes } from '../store/useBaloes';
 import { useSaudeServidor } from '../store/useSaudeServidor';
-import { CHAVES_ESCALARES, ROTULOS } from '../domain/registro';
+import { CHAVES_ESCALARES, ROTULOS, DEF_POR_CHAVE } from '../domain/registro';
+import type { SecaoChave } from '../domain/registro';
 import { coagirValor } from '../domain/coercao';
 import { infoInteresse, detectarTimeCarioca } from '../domain/interesses';
 import {
@@ -68,7 +69,7 @@ function construirSnapshot(): Record<string, unknown> {
 }
 
 function aplicarUpdates(updates: UpdateExtraido[], modo: ModoExtracao): number {
-  const { setCampo } = useCanvas.getState();
+  const { setCampo, marcarSecaoAtiva } = useCanvas.getState();
   const adicionar = useToasts.getState().adicionar;
   let aplicados = 0;
 
@@ -106,13 +107,15 @@ function aplicarUpdates(updates: UpdateExtraido[], modo: ModoExtracao): number {
       logId,
       correcao: modo === 'correcao',
     });
+    const secao = DEF_POR_CHAVE[u.field]?.secao;
+    if (secao) marcarSecaoAtiva(secao);
     aplicados++;
   }
   return aplicados;
 }
 
 function aplicarInvestimentos(itens: InvestimentoExtraido[]): number {
-  const { addInvestimento } = useCanvas.getState();
+  const { addInvestimento, marcarSecaoAtiva } = useCanvas.getState();
   const adicionar = useToasts.getState().adicionar;
   let aplicados = 0;
   for (const it of itens) {
@@ -121,13 +124,14 @@ function aplicarInvestimentos(itens: InvestimentoExtraido[]): number {
     addInvestimento({ nome: it.nome, valor: it.valor });
     adicionar({ rotulo: `Investimento — ${it.nome}`, valor: moeda(it.valor), correcao: false });
     registrarEvento('investimento_adicionado', { nome: it.nome, valor: it.valor });
+    marcarSecaoAtiva('financas'); // investimentos são sempre parte de finanças
     aplicados++;
   }
   return aplicados;
 }
 
 function aplicarObservacoes(itens: ObservacaoExtraida[]): number {
-  const { addObservacao, observacoes } = useCanvas.getState();
+  const { addObservacao, observacoes, marcarSecaoAtiva } = useCanvas.getState();
   const adicionar = useToasts.getState().adicionar;
   const adicionarBalao = useBaloes.getState().adicionar;
   let aplicados = 0;
@@ -142,6 +146,7 @@ function aplicarObservacoes(itens: ObservacaoExtraida[]): number {
     addObservacao({ categoria: o.categoria, chave: o.chave, valor: o.valor ?? '', tipoInteresse: o.tipoInteresse });
     adicionar({ rotulo: o.chave, valor: o.valor ?? '✓', correcao: false });
     registrarEvento('observacao_adicionada', { categoria: o.categoria, chave: o.chave, tipoInteresse: o.tipoInteresse });
+    marcarSecaoAtiva(o.categoria as SecaoChave);
 
     // Paixão detectada (futebol, viagem, filme/série, livro, arte, pet, natureza)
     // → balão que nasce do card "Quem é Você?". Futebol sem time ainda (a fala

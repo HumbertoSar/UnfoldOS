@@ -9,6 +9,7 @@ import { useOrquestrador } from '../extraction/orquestrador';
 import { SECOES, camposDaSecao, type SecaoChave } from '../domain/registro';
 import { patrimonioLiquido, completudePorSecao, secaoTemAlgumDado } from '../domain/agregacao';
 import type { EstadoCanvas } from '../domain/agregacao';
+import { PERGUNTAS_POR_SECAO } from '../domain/estimulos';
 import { moeda } from './format';
 import { Card, CardEyebrow, CardTitle } from '@ds/components/Card';
 import { Button } from '@ds/components/Button';
@@ -19,10 +20,12 @@ import { ConfidenceMeter } from '@ds/components/ConfidenceMeter';
 import { Minimap } from '@ds/components/Minimap';
 import type { MinimapNode } from '@ds/components/Minimap';
 import { ZoomControls } from '@ds/components/ZoomControls';
+import { Waveform } from '@ds/components/Waveform';
 import { InfiniteCanvas } from '@ds/canvas/InfiniteCanvas';
 import { UnfoldCard } from '@ds/canvas/UnfoldCard';
 import { useCanvasViewport } from '@ds/canvas/useCanvasViewport';
 import { BaloesInteresse } from './BaloesInteresse';
+import { useDigitacao } from './useDigitacao';
 
 const ICONE_SECAO: Record<SecaoChave, IconName> = {
   pessoa: 'user',
@@ -71,6 +74,34 @@ function BarraStatus() {
   );
 }
 
+// Bloco "Me diga:" (ver design_handoff_me_diga/5a-SPEC.md) — convite de fala
+// com a próxima pergunta do tema sendo digitada, no rodapé de cards ainda em
+// coleta. `lento` reduz bem o ritmo (Dependentes/Sonhos, quando já têm
+// algum dado — não têm "completo" fixo, só desaceleram o convite).
+function MeDiga({ secao, lento, ativo }: { secao: SecaoChave; lento: boolean; ativo: boolean }) {
+  const indice = Math.max(0, SECOES.findIndex((s) => s.chave === secao));
+  const texto = useDigitacao(PERGUNTAS_POR_SECAO[secao], indice * 220, lento);
+
+  return (
+    <div className="card-block me-diga">
+      <div className="me-diga__rotulo">
+        <span className="me-diga__diamante" aria-hidden="true" />
+        Me diga:
+      </div>
+      <p className="me-diga__pergunta">
+        {texto}
+        <span className="me-diga__cursor" aria-hidden="true">_</span>
+      </p>
+      {ativo && (
+        <div className="me-diga__ouvindo">
+          <Waveform active bars={4} height={14} color="var(--uf-color-positive)" />
+          ouvindo você…
+        </div>
+      )}
+    </div>
+  );
+}
+
 function CartaoSecao({ secao }: { secao: SecaoChave }) {
   const meta = SECOES.find((s) => s.chave === secao)!;
   const dados = useCanvas((s) => s.dados);
@@ -80,6 +111,7 @@ function CartaoSecao({ secao }: { secao: SecaoChave }) {
   // Em "pessoa", paixões (tipoInteresse) viram balão — não duplicam como chip.
   const observacoesExibidas = secao === 'pessoa' ? observacoes.filter((o) => !o.tipoInteresse) : observacoes;
   const destaque = useCanvas((s) => s.campoEmDestaque);
+  const secaoAtiva = useCanvas((s) => s.secaoAtiva);
   const campos = camposDaSecao(secao);
 
   const preenchido = (chave: string) => {
@@ -95,6 +127,10 @@ function CartaoSecao({ secao }: { secao: SecaoChave }) {
     (c) => c.secao === secao,
   );
   const mostrarCompletude = campos.length > 0 && completude !== undefined;
+
+  // "Me diga:" some quando a seção completa (campos tipados). Dependentes/Sonhos
+  // são balde aberto — nunca completam, só desaceleram o convite quando já têm algo.
+  const completo = mostrarCompletude ? completude!.preenchidos === completude!.total : false;
 
   return (
     <Card as="section" elevation={1} padding="md" forming={!algumPreenchido}>
@@ -164,6 +200,8 @@ function CartaoSecao({ secao }: { secao: SecaoChave }) {
           ))}
         </div>
       )}
+
+      {!completo && <MeDiga secao={secao} lento={algumPreenchido} ativo={secaoAtiva === secao} />}
     </Card>
   );
 }
