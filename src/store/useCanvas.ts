@@ -4,6 +4,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ROTULOS } from '../domain/registro';
+import type { SecaoChave } from '../domain/registro';
 
 export type Origem = 'manual' | 'auto' | 'correcao';
 
@@ -40,11 +41,13 @@ interface EstadoCanvasStore {
   capturaIniciada: boolean;
   campoEmDestaque: string | null;
   statusFase: string;
+  secaoAtiva: SecaoChave | null; // seção que recebeu dado por último (~6s) — alimenta "ouvindo você…"
 
   iniciarSessao: () => void;
   encerrarSessao: () => void;
   iniciarCaptura: () => void;
   setStatusFase: (fase: string) => void;
+  marcarSecaoAtiva: (secao: SecaoChave) => void;
 
   setCampo: (campo: string, valor: unknown, origem?: Origem) => string | null;
   limparDestaque: () => void;
@@ -60,6 +63,11 @@ function idUnico(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
+// Duração da "seção ativa" — mesmo tempo de vida de um toast, dá a impressão
+// de "ainda estamos falando disso" por um tempo depois da última captura.
+const DURACAO_SECAO_ATIVA_MS = 6000;
+let timerSecaoAtiva: ReturnType<typeof setTimeout> | undefined;
+
 export const useCanvas = create<EstadoCanvasStore>()(
   persist(
     (set, get) => ({
@@ -72,11 +80,20 @@ export const useCanvas = create<EstadoCanvasStore>()(
       capturaIniciada: false,
       campoEmDestaque: null,
       statusFase: 'Pronto para ouvir',
+      secaoAtiva: null,
 
       iniciarSessao: () => set({ sessaoIniciada: true, statusFase: 'Coletando dados…' }),
       encerrarSessao: () => set({ sessaoIniciada: false, statusFase: 'Sessão encerrada' }),
       iniciarCaptura: () => set({ capturaIniciada: true, statusFase: 'Ouvindo a conversa…' }),
       setStatusFase: (fase) => set({ statusFase: fase }),
+      marcarSecaoAtiva: (secao) => {
+        set({ secaoAtiva: secao });
+        clearTimeout(timerSecaoAtiva);
+        timerSecaoAtiva = setTimeout(
+          () => set((s) => (s.secaoAtiva === secao ? { secaoAtiva: null } : {})),
+          DURACAO_SECAO_ATIVA_MS,
+        );
+      },
 
       setCampo: (campo, valor, origem = 'manual') => {
         const { dados, travados, log } = get();
@@ -143,7 +160,8 @@ export const useCanvas = create<EstadoCanvasStore>()(
         });
       },
 
-      limparTudo: () =>
+      limparTudo: () => {
+        clearTimeout(timerSecaoAtiva);
         set({
           dados: {},
           investimentos: [],
@@ -153,7 +171,9 @@ export const useCanvas = create<EstadoCanvasStore>()(
           campoEmDestaque: null,
           sessaoIniciada: false,
           capturaIniciada: false,
-        }),
+          secaoAtiva: null,
+        });
+      },
     }),
     {
       name: 'diagnostico-canva',
