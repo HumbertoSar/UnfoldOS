@@ -35,7 +35,8 @@ Há TRÊS destinos para o que você captar:
    normalizado no tipo do campo, confidence 0..1, evidence (frase exata)}.
 2) investimentos — cada investimento citado vira um item {nome, valor, confidence, evidence}
    (fundo, previdência, FGTS, ação, CDB, tesouro, poupança, participação em empresa). Item NOVO
-   por investimento; nunca some nem sobrescreva.
+   por investimento; nunca some nem sobrescreva. Ex.: "já tenho investido para previdência 500
+   mil" → investimentos:[{nome:"previdência", valor:500000}] — NUNCA em imoveis ou outro campo.
 3) observacoes — o BALDE. Tudo que NÃO tem campo tipado mas é relevante para conhecer a pessoa:
    paixões/gostos (futebol e time, café, leitura, filmes, viagem), família e PETS, sonhos e
    objetivos, contexto de vida. Cada item: {categoria, chave (rótulo curto), valor (detalhe),
@@ -57,6 +58,9 @@ Há TRÊS destinos para o que você captar:
    - "tenho um cachorro, o Bob" → observacoes:[{categoria:"dependentes", chave:"Pet", valor:"cachorro Bob", tipoInteresse:"pet"}]
    - "quero comprar uma casa na praia" → observacoes:[{categoria:"sonhos", chave:"Casa na praia", valor:""}]
    - "meu filho Lucas tem 16" → observacoes:[{categoria:"dependentes", chave:"Filho", valor:"Lucas, 16"}]
+   - "quero me aposentar com 65 anos" (sozinho, sem repetir a idade atual no trecho) →
+     observacoes:[{categoria:"sonhos", chave:"Aposentadoria", valor:"aos 65 anos"}] — updates FICA
+     VAZIO aqui: não mexe em idade nem em horizonteAnos, mesmo sabendo a idade atual pelo estado.
 
 CAMPOS TIPADOS (para updates):
 ${guiaCampos()}
@@ -86,6 +90,11 @@ REGRAS:
    a pessoa JÁ POSSUI, com valor informado. Desejo/intenção ("quero comprar", "pretendo ter",
    "sonho com") é objetivo → observacoes (categoria sonhos), e NUNCA preenche o campo tipado — em
    especial, NUNCA gere um campo com valor 0.
+7c. IDADE DE APOSENTADORIA ≠ idade atual nem horizonteAnos. "Quero me aposentar com X anos" é
+   objetivo (categoria sonhos) — NUNCA sobrescreve idade (que só muda se a pessoa disser a idade
+   dela de verdade, tipo "eu tenho X anos") nem vira horizonteAnos (que é sobre quanto tempo
+   pretende deixar o DINHEIRO investido, não sobre quando se aposentar). Ex.: "quero me aposentar
+   com 65 anos" → observacoes:[{categoria:"sonhos", chave:"Aposentadoria", valor:"aos 65 anos"}].
 8. Não repita um valor já presente NAQUELE MESMO campo/observação, a menos que tenha mudado.
    Campos diferentes NUNCA são duplicata um do outro.
 9. Se for ambíguo ou conversa fiada, não registre. Prefira o BALDE a forçar um campo tipado:

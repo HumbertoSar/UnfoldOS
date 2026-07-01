@@ -125,8 +125,12 @@ function aplicarObservacoes(itens: ObservacaoExtraida[]): number {
     registrarEvento('observacao_adicionada', { categoria: o.categoria, chave: o.chave, tipoInteresse: o.tipoInteresse });
 
     // Paixão detectada (futebol, viagem, filme/série, livro, arte, pet, natureza)
-    // → balão que nasce do card "Quem é Você?".
-    if (o.tipoInteresse) {
+    // → balão que nasce do card "Quem é Você?". Futebol sem time ainda (a fala
+    // foi cortada antes do nome do clube) não vira balão — evita um balão
+    // "Torcedor(a)" vazio seguido de outro completo quando o resto da frase
+    // chega no próximo trecho.
+    const futebolSemTime = o.tipoInteresse === 'futebol' && !o.valor;
+    if (o.tipoInteresse && !futebolSemTime) {
       const { emoji, texto } = infoInteresse(o.tipoInteresse);
       const time = o.tipoInteresse === 'futebol' ? detectarTimeCarioca(o.valor ?? '') : null;
       adicionarBalao({
